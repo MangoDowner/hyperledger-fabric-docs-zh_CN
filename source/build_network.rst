@@ -1,5 +1,8 @@
-Building Your First Network
+创建你的第一个网络（Building Your First Network）
 ===========================
+
+.. 提示::  该教程已经被验证过，基于最新的稳定版本Docker镜像和预编译的安装程序（包含在提供的tar文件里）。
+           如果你使用当前的master分支中的镜像或工具来运行指令，有可能会看到配置和panic错误。
 
 .. note:: These instructions have been verified to work against the
           latest stable Docker images and the pre-compiled
@@ -8,17 +11,27 @@ Building Your First Network
           branch, it is possible that you will see configuration and panic
           errors.
 
+“构建你的第一个网络（BYFN）”场景提供了一个示例性的 Hyperledger Fabric 网络，
+该网络包括了两个组织机构(Organization)，每个组织机构(Organization)都维护了两个对等节点(Peer)，
+并提供“单独”的排序服务(Ordering Service)。
+
 The build your first network (BYFN) scenario provisions a sample Hyperledger
 Fabric network consisting of two organizations, each maintaining two peer
 nodes, and a "solo" ordering service.
 
-Install prerequisites
+安装先决条件（Install prerequisites）
 ---------------------
+
+在我们开始之前，如果你还没这样做的话，最好检查下你是否安装了所有的 :doc:`prereqs`，
+他们需要被安装在开发区块链应用或操作Hyperledger Fabric的平台上。
 
 Before we begin, if you haven't already done so, you may wish to check that
 you have all the :doc:`prereqs` installed on the platform(s)
 on which you'll be developing blockchain applications and/or operating
 Hyperledger Fabric.
+
+你还需要 :doc:`install`。你会发现在 ``fabric-samples`` 仓库里已经有很多例子了。
+我们会使用 ``first-network`` 这个例子。让我们现在打开那个子目录吧。
 
 You will also need to :doc:`install`. You will notice
 that there are a number of samples included in the ``fabric-samples``
@@ -28,6 +41,9 @@ sub-directory now.
 .. code:: bash
 
   cd fabric-samples/first-network
+
+.. 提示:: 本文章中提供的命令 **必须** 在你的 ``fabric-samples`` 仓库的 ``first-network`` 子目录下运行。
+如果你选择在其他位置运行命令，那么提供的各种脚本就无法找到可执行文件。
 
 .. note:: The supplied commands in this documentation
           **MUST** be run from your ``first-network`` sub-directory
