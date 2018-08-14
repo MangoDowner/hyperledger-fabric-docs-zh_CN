@@ -1,49 +1,39 @@
-Prerequisites
+先决条件
 =============
 
-Before we begin, if you haven't already done so, you may wish to check that
-you have all the prerequisites below installed on the platform(s)
-on which you'll be developing blockchain applications and/or operating
-Hyperledger Fabric.
+在我们开始之前，如果你还没这样做的话，最好检查下你是否安装了下面提到的所有先决条件，
+他们需要被安装在开发区块链应用或操作Hyperledger Fabric的平台上。
 
-Install cURL
+安装cURL
 ------------
 
-Download the latest version of the `cURL
-<https://curl.haxx.se/download.html>`__ tool if it is not already
-installed or if you get errors running the curl commands from the
-documentation.
+下载最新版本的 `cURL <https://curl.haxx.se/download.html>`__ 工具，
+如果还没安装或者运行文档中的curl命令报错的话。
 
-.. note:: If you're on Windows please see the specific note on `Windows
-   extras`_ below.
+.. 提示:: 如果你在Windows下，请看下面的 `Windows extras`_ .
 
-Docker and Docker Compose
+Docker 和 Docker Compose
 -------------------------
 
-You will need the following installed on the platform on which you will be
-operating, or developing on (or for), Hyperledger Fabric:
+你将需要在操作或开发Hyperledger Fabric的平台上安装以下这些：
 
-  - MacOSX, \*nix, or Windows 10: `Docker <https://www.docker.com/get-docker>`__
-    Docker version 17.06.2-ce or greater is required.
-  - Older versions of Windows: `Docker
+  - MacOSX, \*nix, 或者 Windows 10: `Docker <https://www.docker.com/get-docker>`__
+    需要Docker 17.06.2-ce 或者更高版本。
+  - 老版本的Windows: `Docker
     Toolbox <https://docs.docker.com/toolbox/toolbox_install_windows/>`__ -
-    again, Docker version Docker 17.06.2-ce or greater is required.
+    同样, 需要Docker 17.06.2-ce 或者更高版本。
 
-You can check the version of Docker you have installed with the following
-command from a terminal prompt:
+你可以在命令行中输入以下命令来确认你安装的Docker版本。
 
 .. code:: bash
 
   docker --version
 
-.. note:: Installing Docker for Mac or Windows, or Docker Toolbox will also
-          install Docker Compose. If you already had Docker installed, you
-          should check that you have Docker Compose version 1.14.0 or greater
-          installed. If not, we recommend that you install a more recent
-          version of Docker.
+.. note:: 在Mac或者Windows上安装Docker会同时安装Docker Compose。如果里已经安装了Docker，
+          你需要检查下你是不是也安装了Docker Compose 1.14.0或者更高版本。
+          如果没有，我们建议你安装一个更近一点的Docker版本。
 
-You can check the version of Docker Compose you have installed with the
-following command from a terminal prompt:
+你可以在命令行中输入以下命令来确认你安装的ocker Compose版本
 
 .. code:: bash
 
@@ -51,62 +41,51 @@ following command from a terminal prompt:
 
 .. _Golang:
 
-Go Programming Language
+Go 编程语言
 -----------------------
 
-Hyperledger Fabric uses the Go Programming Language for many of its
-components.
+Hyperledger Fabric使用Go编程语言来编写它的很多组件。
 
-  - `Go <https://golang.org/dl/>`__ version 1.10.x is required.
+  - `Go <https://golang.org/dl/>`__ 1.10.x 版本是需要的。
 
-Given that we will be writing chaincode programs in Go, there are two
-environment variables you will need to set properly; you can make these
-settings permanent by placing them in the appropriate startup file, such
-as your personal ``~/.bashrc`` file if you are using the ``bash`` shell
-under Linux.
+既然我们要用Go来编写链码（chaincode）程序，有两个环境变量就需要被正确的设置；
+你可以将他们放在合适的启动文件里，这样就可以永久设定了，比如说你使用Linux的话，
+你就可以使用你的 ``~/.bashrc`` 文件。
 
-First, you must set the environment variable ``GOPATH`` to point at the
-Go workspace containing the downloaded Fabric code base, with something like:
+首先，你需要设置环境变量 ``GOPATH`` 以指定Go的工作空间（workspace），它包含了下载的Fabric代码。
+比如可以这么设定：
+
 
 .. code:: bash
 
   export GOPATH=$HOME/go
 
-.. note:: You **must** set the GOPATH variable
+.. note:: 你 **必须** 设置GOPATH变量
 
-  Even though, in Linux, Go's ``GOPATH`` variable can be a colon-separated list
-  of directories, and will use a default value of ``$HOME/go`` if it is unset,
-  the current Fabric build framework still requires you to set and export that
-  variable, and it must contain **only** the single directory name for your Go
-  workspace. (This restriction might be removed in a future release.)
+  尽管在Linux中，Go的 ``GOPATH`` 变量可以是一个冒号分隔的目录列表，并且在未设置的情况下使用默认值
+  ``$HOME/go``，当前的Fabric构建框架仍然要求你设置并且导出（export）这个变量。并且它必须 **只** 包含
+  Go的工作空间目录。(这个限制可能会在将来的版本中被移除。)
 
-Second, you should (again, in the appropriate startup file) extend your
-command search path to include the Go ``bin`` directory, such as the following
-example for ``bash`` under Linux:
+其二，你应该（再次，在正确的启动文件里）扩展你的命令查询路径（PATH）来将Go ``bin`` 目录包含进来，比如说下面的
+Linux ``bash`` 例子:
 
 .. code:: bash
 
   export PATH=$PATH:$GOPATH/bin
 
-While this directory may not exist in a new Go workspace installation, it is
-populated later by the Fabric build system with a small number of Go executables
-used by other parts of the build system. So even if you currently have no such
-directory yet, extend your shell search path as above.
+虽然这个目录可能在新安装的Go工作空间中不存在，但它随后将由Fabric构建系统填充，其中包含了少量的go可执行文件，
+这些文件由构建系统的其他部分使用。所以即使你现在没有这个目录，还请如上所述那样扩展你的命令行查询路径。
 
-Node.js Runtime and NPM
+Node.js 运行时（Runtime） 和 NPM
 -----------------------
 
-If you will be developing applications for Hyperledger Fabric leveraging the
-Hyperledger Fabric SDK for Node.js, you will need to have version 8.9.x of Node.js
-installed.
+如果你要使用Hyperledger Fabric SDK的Node.js版本来开发Hyperledger Fabric应用, 你就需要安装Node.js的8.9.x 版本。
 
 .. note:: Node.js version 9.x is not supported at this time.
 
-  - `Node.js <https://nodejs.org/en/download/>`__ - version 8.9.x or greater
+  - `Node.js <https://nodejs.org/en/download/>`__ - 8.9.x 或者更高版本
 
-.. note:: Installing Node.js will also install NPM, however it is recommended
-          that you confirm the version of NPM installed. You can upgrade
-          the ``npm`` tool with the following command:
+.. note:: 安装Node.js同时会安装NPM，然而你最好确认下安装的NPM版本。你可以使用下面的命令来更新 ``npm`` 工具。
 
 .. code:: bash
 
@@ -115,17 +94,18 @@ installed.
 Python
 ^^^^^^
 
-.. note:: The following applies to Ubuntu 16.04 users only.
+.. note:: 下面的内容只对Ubuntu 16.04用户有效。
+          译者注：MacOS默认安装了Python 2.7。
 
-By default Ubuntu 16.04 comes with Python 3.5.1 installed as the ``python3`` binary.
-The Fabric Node.js SDK requires an iteration of Python 2.7 in order for ``npm install``
-operations to complete successfully.  Retrieve the 2.7 version with the following command:
+默认情况下，Ubuntu 16.04会安装好Python 3.5.1版本来作为 ``python3`` 的可执行文件。
+Fabric Node.js SDK需要Python 2.7以执行 ``npm install`` 操作，从而成功安装。
+通过下面的命令可以获取2.7版本：
 
 .. code:: bash
 
   sudo apt-get install python
 
-Check your version(s):
+检查你的版本:
 
 .. code:: bash
 
@@ -133,72 +113,57 @@ Check your version(s):
 
 .. _windows-extras:
 
-Windows extras
+Windows 额外需要安装的东西
 --------------
 
-If you are developing on Windows 7, you will want to work within the
-Docker Quickstart Terminal which uses `Git Bash
-<https://git-scm.com/downloads>`__ and provides a better alternative
-to the built-in Windows shell.
+如果你在Windows 7上面开发，你需要使用Docker Quickstart Terminal，它使用 `Git Bash
+<https://git-scm.com/downloads>`__ 并且提供了Windows内置shell的更好替代物。
 
-However experience has shown this to be a poor development environment
-with limited functionality. It is suitable to run Docker based
-scenarios, such as :doc:`getting_started`, but you may have
-difficulties with operations involving the ``make`` and ``docker``
-commands.
+然而经验表明，这是个功能受限不好的开发环境。它适用于运行基于Docker的场景，比如说 :doc:`getting_started`,
+但是在使用包含``make`` 及 ``docker`` 命令在内的操作的时候，可能会困难重重。
 
-On Windows 10 you should use the native Docker distribution and you
-may use the Windows PowerShell. However, for the ``binaries``
-command to succeed you will still need to have the ``uname`` command
-available. You can get it as part of Git but beware that only the
-64bit version is supported.
+在Windows 10上面，你应该使用原生的Docker发行版，而且最好使用Windows PowerShell。
+然而，为了让 ``binaries`` 命令能够成功运行，你还需要 ``uname`` 命令是可用的。
+你可以将它作为Git的一部分获取到，但是请注意，只有64位的版本才支持。
 
-Before running any ``git clone`` commands, run the following commands:
+
+在运行任何 ``git clone`` 命令之前，运行下面的命令：
 
 ::
 
     git config --global core.autocrlf false
     git config --global core.longpaths true
 
-You can check the setting of these parameters with the following commands:
+你可以使用下面的命令来检查这些参数的设定：
 
 ::
 
     git config --get core.autocrlf
     git config --get core.longpaths
+它们需要分别为 ``false`` 和 ``true``。
 
-These need to be ``false`` and ``true`` respectively.
+Git和 Docer Toolbox中的 ``curl`` 命令已经陈旧了，而且不能够正确处理 :doc:`getting_started` 中的跳转。
+确保你通过 `cURL downloads page <https://curl.haxx.se/download.html>`__ 安装并使用了更新的版本。
 
-The ``curl`` command that comes with Git and Docker Toolbox is old and
-does not handle properly the redirect used in
-:doc:`getting_started`. Make sure you install and use a newer version
-from the `cURL downloads page <https://curl.haxx.se/download.html>`__
-
-For Node.js you also need the necessary Visual Studio C++ Build Tools
-which are freely available and can be installed with the following
-command:
+为了Node.js,你还需要不可或缺的Visual Studio C++构建工具，它可以免费获取而且可以通过以下命令安装：
 
 .. code:: bash
 
 	  npm install --global windows-build-tools
 
-See the `NPM windows-build-tools page
-<https://www.npmjs.com/package/windows-build-tools>`__ for more
-details.
+查看 `NPM windows-build-tools page
+<https://www.npmjs.com/package/windows-build-tools>`__ 来获取更多细节。
 
-Once this is done, you should also install the NPM GRPC module with the
-following command:
+一旦这些都做到了，你应该使用下面的命令来安装NPM GRPC模块：
 
 .. code:: bash
 
 	  npm install --global grpc
 
-Your environment should now be ready to go through the
-:doc:`getting_started` samples and tutorials.
+现在，你的环境应该能够走通 :doc:`getting_started` 中的例子和教程了。
 
-.. note:: If you have questions not addressed by this documentation, or run into
-          issues with any of the tutorials, please visit the :doc:`questions`
-          page for some tips on where to find additional help.
+.. note:: 如果你还有本文未能提到的问题，或者遇到了任何教程中的问题，请访问 :doc:`questions`
+          页面来获取如何找到更多帮助的方法。
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
