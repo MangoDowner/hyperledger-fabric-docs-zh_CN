@@ -68,11 +68,8 @@
 	  byfn.sh up
 	  byfn.sh down
 
-If you choose not to supply a channel name, then the
-script will use a default name of ``mychannel``.  The CLI timeout parameter
-(specified with the -t flag) is an optional value; if you choose not to set
-it, then the CLI will give up on query requests made after the default
-setting of 10 seconds.
+如果你还没提供通道名称，脚本将会使用默认名称``mychannel``。
+CLI超时参数(用-t标记指定)是可选的值；如果你不设置它，CLI将默认在10s后放弃请求。
 
 生成网络构建（Artifacts）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -357,10 +354,8 @@ Configtxgen 用到了一个文件 - ``configtx.yaml`` - 其包含了例子网络
 手动生成构建（artifacts）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can refer to the ``generateCerts`` function in the byfn.sh script for the
-commands necessary to generate the certificates that will be used for your
-network configuration as defined in the ``crypto-config.yaml`` file. However,
-for the sake of convenience, we will also provide a reference here.
+您可以在byfn.sh脚本中引用``generateCerts``函数用于生成证书所需的命令，这些证书将用于您的网络配置，
+正如 ``crypto-config.yaml`` 中定义的那样。但是，为了方便起见，我们在这里也提供一个参考。
 
 首先，我们来运行 ``cryptogen`` 工具。我们的二进制文件在 ``bin`` 目录里，所以我们需要提供工具所在的相对路径。
 
@@ -445,8 +440,7 @@ for the sake of convenience, we will also provide a reference here.
 我们会使用一个脚本来启动来运转我们的网络。
 docker-compose会引用我们之前下载的镜像,并且通过我们之前生成的 ``genesis.block`` 来启动排序节。
 
-We want to go through the commands manually in order to expose the
-syntax and functionality of each call.
+我们希望手动遍历这些命令，以便公开每个调用的语法和功能。
 
 首先，让我们开始我们的网络：
 
@@ -543,19 +537,17 @@ syntax and functionality of each call.
 
 .. code:: bash
 
-        # By default, this joins ``peer0.org1.example.com`` only
-        # the <channel-ID.block> was returned by the previous command
-        # if you have not modified the channel name, you will join with mychannel.block
-        # if you have created a different channel name, then pass in the appropriately named block
+        # 默认，这仅仅加入了 ``peer0.org1.example.com``
+        # <channel-ID.block> 会由之前的命令会返回
+        # 如果你没有改过通道名, 你会通过 mychannel.block 加入
+        # 如果你是用不同的通道名加入, 那么传递合理命名的区块吧
 
          peer channel join -b mychannel.block
 
-You can make other peers join the channel as necessary by making appropriate
-changes in the four environment variables we used in the :ref:`peerenvvars`
-section, above.
+您可以通过对我们在上面的 :ref:`peerenvvars` 部分中使用的四个环境变量进行适当的更改，使其他对等点在必要时加入通道。
 
-Rather than join every peer, we will simply join ``peer0.org2.example.com`` so that
-we can properly update the anchor peer definitions in our channel.
+
+与其加入每个peer，我们只需加入 ``peer0.org2.example.com``，这样我们就可以适当地更新我们通道中的锚点peer定义。
 要重写CLI容器里的默认环境变量，完整的命令如下所示:
 
 .. code:: bash
@@ -611,7 +603,7 @@ we can properly update the anchor peer definitions in our channel.
 .. code:: bash
 
     # 这个安装 Node.js 链码
-    # make note of the -l flag; we use this to specify the language
+    # 注意下 -l 标记; 我们使用它来表明所用语言
     peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
 
 
@@ -633,15 +625,13 @@ we can properly update the anchor peer definitions in our channel.
 
 **Node.js**
 
-.. note::  The instantiation of the Node.js chaincode will take roughly a minute.
-           The command is not hanging; rather it is installing the fabric-shim
-           layer as the image is being compiled.
+.. note::  Node.js链码实例化大约需要一分钟。命令没有挂起;而是在镜像编译时安装fabric-shim层。
 
 .. code:: bash
 
-    # be sure to replace the $CHANNEL_NAME environment variable if you have not exported it
-    # if you did not install your chaincode with a name of mycc, then modify that argument as well
-    # notice that we must pass the -l flag after the chaincode name to identify the language
+    # 确保替换了 $CHANNEL_NAME 环境变量，如果你之前未export它
+    # 如果你以mycc的为名字安装链码，那么还需要修改那个参数
+    # 注意我们必须在链码名字后面传递-l标记来表明语言
 
     peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
 
@@ -703,7 +693,6 @@ policies <http://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policie
 该场景背后发生了什么?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 .. note:: 这些步骤描述了由'./byfn.sh up'运行的``script.sh``脚本中的场景。
           用``./byfn.sh down``清理你的网络，并确保此命令是活跃的。
           然后使用相同的docker-compose提示再次启动网络。
@@ -763,7 +752,7 @@ policies <http://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policie
 我怎么看到这些事务?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-检查CLI Docker容器的日志Check the logs for the CLI Docker container.
+检查CLI Docker容器的日志。
 
 .. code:: bash
 
@@ -841,53 +830,43 @@ BYFN示例提供了两种Docker Compose文件，它们都是从``docker-compose-
 使用 CouchDB
 -------------
 
-The state database can be switched from the default (goleveldb) to CouchDB.
-The same chaincode functions are available with CouchDB, however, there is the
-added ability to perform rich and complex queries against the state database
-data content contingent upon the chaincode data being modeled as JSON.
+状态数据库可以从默认值(goleveldb)切换到CouchDB。
+使用CouchDB可以使用相同的chaincode函数，但是还添加了对状态数据库数据内容执行丰富复杂查询的功能，
+前提是要将chaincode数据建模为JSON。
 
-To use CouchDB instead of the default database (goleveldb), follow the same
-procedures outlined earlier for generating the artifacts, except when starting
-the network pass ``docker-compose-couch.yaml`` as well:
+要使用CouchDB而不是默认数据库(goleveldb)，除了启动网络时传递``docker-compose-couch.yaml``外，
+还需遵循前面描述的生成构件的相同过程:
 
 .. code:: bash
 
     docker-compose -f docker-compose-cli.yaml -f docker-compose-couch.yaml up -d
 
-**chaincode_example02** should now work using CouchDB underneath.
+**chaincode_example02** 应该能够在CouchDB支持下运行了。
 
-.. note::  If you choose to implement mapping of the fabric-couchdb container
-           port to a host port, please make sure you are aware of the security
-           implications. Mapping of the port in a development environment makes the
-           CouchDB REST API available, and allows the
-           visualization of the database via the CouchDB web interface (Fauxton).
-           Production environments would likely refrain from implementing port mapping in
-           order to restrict outside access to the CouchDB containers.
+.. note::  如果您选择实现fabric-couchdb容器端口到主机端口的映射，请确保您知道它的安全含义。
+           开发环境中端口的映射使CouchDB REST API可用，并允许通过CouchDB web接口(Fauxton)来实现数据库可视化。
+           为了限制对CouchDB容器的外部访问，生产环境可能不会实现端口映射。
 
-You can use **chaincode_example02** chaincode against the CouchDB state database
-using the steps outlined above, however in order to exercise the CouchDB query
-capabilities you will need to use a chaincode that has data modeled as JSON,
-(e.g. **marbles02**). You can locate the **marbles02** chaincode in the
-``fabric/examples/chaincode/go`` directory.
+您可以使用上面列出的步骤对CouchDB状态数据库使用 **chaincode_example02** 链码，
+但是为了执行CouchDB查询功能，您将需要使用具有JSON建模数据的链码(例如 **marbles02**)。
+您可以在 ``fabric/examples/chaincode/go`` 目录中找到 **marbles02** 链码。
 
-We will follow the same process to create and join the channel as outlined in the
-:ref:`createandjoin` section above.  Once you have joined your peer(s) to the
-channel, use the following steps to interact with the **marbles02** chaincode:
+我们将按照相同的过程来创建并加入 :ref:`createandjoin` 部分列出的通道。
+一旦你把你的peer加入了通道，使用以下步骤与 **marbles02** 链码交互:
 
--  Install and instantiate the chaincode on ``peer0.org1.example.com``:
+-  在 ``peer0.org1.example.com``上安装并且实例化链码：
 
 .. code:: bash
 
-       # be sure to modify the $CHANNEL_NAME variable accordingly for the instantiate command
-
+       # 确保为实例化的命令相应地修改 $CHANNEL_NAME 变量
        peer chaincode install -n marbles -v 1.0 -p github.com/chaincode/marbles02/go
        peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org0MSP.peer','Org1MSP.peer')"
 
--  Create some marbles and move them around:
+-  创建一些大理石（marbles）并且转移他们:
 
 .. code:: bash
 
-        # be sure to modify the $CHANNEL_NAME variable accordingly
+        # 确保相应地修改 $CHANNEL_NAME 变量
 
         peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
         peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble2","red","50","tom"]}'
@@ -896,48 +875,47 @@ channel, use the following steps to interact with the **marbles02** chaincode:
         peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["transferMarblesBasedOnColor","blue","jerry"]}'
         peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["delete","marble1"]}'
 
--  If you chose to map the CouchDB ports in docker-compose, you can now view
-   the state database through the CouchDB web interface (Fauxton) by opening
-   a browser and navigating to the following URL:
+
+-  如果您选择在docker-compose中映射CouchDB端口，
+   现在您可以通过CouchDB web interface (Fauxton)查看状态数据库，方法是打开浏览器并导航到以下URL:
 
    ``http://localhost:5984/_utils``
 
-You should see a database named ``mychannel`` (or your unique channel name) and
-the documents inside it.
+你应该看见一个叫做 ``mychannel`` (或者你特有的通道名)的数据库，还有里面的文档。
 
-.. note:: For the below commands, be sure to update the $CHANNEL_NAME variable appropriately.
+.. note:: 对于下面的命令，确保恰当更新了 $CHANNEL_NAME 变量。
 
-You can run regular queries from the CLI (e.g. reading ``marble2``):
+您可以从CLI中运行常规查询 (比如说 reading ``marble2``):
 
 .. code:: bash
 
       peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["readMarble","marble2"]}'
 
-The output should display the details of ``marble2``:
+输出应该展示了 ``marble2`` 的细节:
 
 .. code:: bash
 
        Query Result: {"color":"red","docType":"marble","name":"marble2","owner":"jerry","size":50}
 
-You can retrieve the history of a specific marble - e.g. ``marble1``:
+你可以获得特定marble的历史 - 例如说 ``marble1``:
 
 .. code:: bash
 
       peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["getHistoryForMarble","marble1"]}'
 
-The output should display the transactions on ``marble1``:
+输出应该显示了 ``marble1`` 上的事务:
 
 .. code:: bash
 
       Query Result: [{"TxId":"1c3d3caf124c89f91a4c0f353723ac736c58155325f02890adebaa15e16e6464", "Value":{"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"tom"}},{"TxId":"755d55c281889eaeebf405586f9e25d71d36eb3d35420af833a20a2f53a3eefd", "Value":{"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"jerry"}},{"TxId":"819451032d813dde6247f85e56a89262555e04f14788ee33e28b232eef36d98f", "Value":}]
 
-You can also perform rich queries on the data content, such as querying marble fields by owner ``jerry``:
+您还可以对数据内容执行富查询，例如通过所有者``jerry``查询大理石（marble）字段:
 
 .. code:: bash
 
       peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesByOwner","jerry"]}'
 
-The output should display the two marbles owned by ``jerry``:
+输出应该显示``jerry``拥有的两个大理石（marbles）：
 
 .. code:: bash
 
@@ -946,20 +924,23 @@ The output should display the two marbles owned by ``jerry``:
 
 为什么要使用 CouchDB
 -------------
-CouchDB is a kind of NoSQL solution. It is a document-oriented database where document fields are stored as key-value maps. Fields can be either a simple key-value pair, list, or map.
-In addition to keyed/composite-key/key-range queries which are supported by LevelDB, CouchDB also supports full data rich queries capability, such as non-key queries against the whole blockchain data,
-since its data content is stored in JSON format and fully queryable. Therefore, CouchDB can meet chaincode, auditing, reporting requirements for many use cases that not supported by LevelDB.
 
-CouchDB can also enhance the security for compliance and data protection in the blockchain. As it is able to implement field-level security through the filtering and masking of individual attributes within a transaction, and only authorizing the read-only permission if needed.
+CouchDB是一种NoSQL解决方案。它是一个面向文档的数据库，文档字段存储为键-值映射。
+字段可以是简单的键-值对、列表或映射。除了LevelDB支持的键控/组合键/键范围查询（keyed/composite-key/key-range）之外，
+CouchDB还支持完整的数据丰富查询功能，比如对整个区块链数据进行非键查询，因为它的数据内容以JSON格式存储，完全可以查询。
+因此，CouchDB可以满足许多未被LevelDB支持的用例的链码、审计和报告需求。
 
-In addition, CouchDB falls into the AP-type (Availability and Partition Tolerance) of the CAP theorem. It uses a master-master replication model with ``Eventual Consistency``.
-More information can be found on the
-`Eventual Consistency page of the CouchDB documentation <http://docs.couchdb.org/en/latest/intro/consistency.html>`__.
-However, under each fabric peer, there is no database replicas, writes to database are guaranteed consistent and durable (not ``Eventual Consistency``).
+CouchDB还可以增强区块链中的遵从性和数据保护的安全性。因为它能够通过过滤和屏蔽事务中的单个属性来实现字段级安全性（field-level security），
+并且仅在需要时授权只读权限。
 
-CouchDB is the first external pluggable state database for Fabric, and there could and should be other external database options. For example, IBM enables the relational database for its blockchain.
-And the CP-type (Consistency and Partition Tolerance) databases may also in need, so as to enable data consistency without application level guarantee.
+此外，CouchDB符合CAP定理的ap类型(可用性和分区容忍性)。它使用一个最终具有一致性的主控复制（master-master replication）模型。
+更多信息可以在CouchDB文档的
+`Eventual Consistency page of the CouchDB documentation <http://docs.couchdb.org/en/latest/intro/consistency.html>`__
+页面找到。
+然而，在每个fabric peer下，都没有数据库副本，对数据库的写入保证了一致性和持久性(而不是``最终一致性``)。
 
+CouchDB是Fabric的第一个外部插件化状态数据库，可以也应该有其他外部数据库可选才对。
+例如，IBM为其区块链启用了关系数据库。而可能也需要CP-type (一致性和分区容忍性)数据库，以便在没有应用层保证的情况下实现数据一致性。
 
 关于数据持久化的说明
 --------------------------
