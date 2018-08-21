@@ -1,94 +1,71 @@
-Capability Requirements
+功能要求
 -----------------------
+由于Fabric是一个通常涉及多个组织的分布式系统（有时在不同的国家甚至大陆），
+因此网络中可能（并且通常）存在许多不同版本的Fabric代码。
+然而，网络以相同的方式处理事务以使每个人对当前网络状态具有相同的视图是至关重要的。
 
-Because Fabric is a distributed system that will usually involve multiple
-organizations (sometimes in different countries or even continents), it is
-possible (and typical) that many different versions of Fabric code will exist in
-the network. Nevertheless, it’s vital that networks process transactions in the
-same way so that everyone has the same view of the current network state.
+这意味着每个网络 - 以及该网络中的每个通道 - 必须定义一组我们称之为“功能”的能够参与处理交易的东西。
+例如，Fabric v1.1引入了新的MSP角色类型“Peer”和“Client”。
+但是，如果v1.0的peer不理解这些新角色类型，则无法正确评估引用它们的背书策略。
+这意味着在可以使用新角色类型之前，网络必须同意启用v1.1 ``通道`` 功能要求，确保所有peer做出相同的决策。
 
-This means that every network -- and every channel within that network – must
-define a set of what we call “capabilities” to be able to participate in
-processing transactions. For example, Fabric v1.1 introduces new MSP role types
-of “Peer” and “Client”. However, if a v1.0 peer does not understand these new
-role types, it will not be able to appropriately evaluate an endorsement policy
-that references them. This means that before the new role types may be used, the
-network must agree to enable the v1.1 ``channel`` capability requirement,
-ensuring that all peers come to the same decision.
+只有支持所需功能的二进制文件才能参与该通道，而较新的二进制版本在启用相应功能之前不会启用新的验证逻辑。
+通过这种方式，功能要求确保即使使用不同的构建和版本，网络也不可能遭受状态分叉。
 
-Only binaries which support the required capabilities will be able to participate in the
-channel, and newer binary versions will not enable new validation logic until the
-corresponding capability is enabled.  In this way, capability requirements ensure that
-even with disparate builds and versions, it is not possible for the network to suffer a
-state fork.
-
-Defining Capability Requirements
+定义功能要求
 ================================
 
-Capability requirements are defined per channel in the channel configuration (found
-in the channel’s most recent configuration block). The channel configuration contains
-three locations, each of which defines a capability of a different type.
+通道配置中的每个通道都定义了功能要求（可在通道的最新配置块中找到）。
+通道配置包含三个位置，每个位置定义了不同类型的功能。
 
 +------------------+-----------------------------------+----------------------------------------------------+
-| Capability Type  | Canonical Path                    | JSON Path                                          |
+| 功能类型           | 典范（Canonical）路径               | JSON 路径                                           |
 +==================+===================================+====================================================+
-| Channel          | /Channel/Capabilities             | .channel_group.values.Capabilities                 |
+| 通道              | /Channel/Capabilities             | .channel_group.values.Capabilities                 |
 +------------------+-----------------------------------+----------------------------------------------------+
-| Orderer          | /Channel/Orderer/Capabilities     | .channel_group.groups.Orderer.values.Capabilities  |
+| 排序节点           | /Channel/Orderer/Capabilities     | .channel_group.groups.Orderer.values.Capabilities  |
 +------------------+-----------------------------------+----------------------------------------------------+
-| Application      | /Channel/Application/Capabilities | .channel_group.groups.Application.values.          |
+| 应用              | /Channel/Application/Capabilities | .channel_group.groups.Application.values.          |
 |                  |                                   | Capabilities                                       |
 +------------------+-----------------------------------+----------------------------------------------------+
 
-* **Channel:** these capabilities apply to both peer and orderers and are located in
-  the root ``Channel`` group.
+通道：这些功能适用于对等和订购者，并且位于根通道组中。
+订货人：仅适用于订货人，位于订货人组。
+应用程序：仅适用于对等项，位于“应用程序”组中。
 
-* **Orderer:** apply to orderers only and are located in the ``Orderer`` group.
+* **通道:** 这些功能适用于peer和排序节点，并且位于根 ``通道`` 组中。
 
-* **Application:** apply to peers only and are located in the ``Application`` group.
+* **排序节点:** 仅适用于排序节点，位于订 ``排序节点`` 组
 
-The capabilities are broken into these groups in order to align with the existing
-administrative structure. Updating orderer capabilities is something the ordering orgs
-would manage independent of the application orgs. Similarly, updating application
-capabilities is something only the application admins would manage. By splitting the
-capabilities between "Orderer" and "Application", a hypothetical network could run a
-v1.6 ordering service while supporting a v1.3 peer application network.
+* **应用程序:** 仅适用于peer，位于 ``应用程序`` 组中
 
-However, some capabilities cross both the ‘Application’ and ‘Orderer’ groups. As we
-saw earlier, adding a new MSP role type is something both the orderer and application
-admins agree to and need to recognize. The orderer must understand the meaning
-of MSP roles in order to allow the transactions to pass through ordering, while
-the peers must understand the roles in order to validate the transaction. These
-kinds of capabilities -- which span both the application and orderer components
--- are defined in the top level "Channel" group.
+这些功能被分解为这些组，以便与现有的管理结构保持一致。
+更新排序节点功能是排序组织独立于应用程序组织管理的内容。
+同样，更新应用程序功能只是应用程序管理员可以管理的内容。
+假设网络可以运行v1.6排序服务，那么通过在“排序节点”和“应用程序”之间拆分功能，就同时支持v1.3对等应用程序网络。
 
-.. note:: It is possible that the channel capabilities are defined to be at version
-          v1.3 while the orderer and application capabilities are defined to be at
-          version 1.1 and v1.4, respectively. Enabling a capability at the "Channel"
-          group level does not imply that this same capability is available at the
-          more specific "Orderer" and "Application" group levels.
+但是，某些功能跨越了“应用程序”和“排序节点”组。
+如前所述，添加新的MSP角色类型，这是排序节点和应用程序管理员应该同意并识别的内容。
+排序节点必须理解MSP角色的含义，以便允许事务通过排序，而peer必须理解角色才能验证事务。
+这些功能 - 跨越应用程序和排序节点组件 - 在顶级“通道”组中定义。
 
-Setting Capabilities
+
+.. note:: 有一种可能，比如说通道功能定义为版本v1.3，而排序节点和应用程序功能分别定义为版本1.1和v1.4。
+          在“通道”组级别启用功能并不意味着在更具体的“排序节点”和“应用程序”组级别上可以使用相同的功能。
+
+设定功能
 ====================
 
-Capabilities are set as part of the channel configuration (either as part of the
-initial configuration -- which we'll talk about in a moment -- or as part of a
-reconfiguration).
+功能被设置为通道配置的一部。要么作为初始配置的一部分（我们将在稍后讨论）， 要么作为重新配置的一部分。
 
-.. note:: We have a two documents that talk through different aspects of channel
-          reconfigurations. First, we have a tutorial that will take you through
-          the process of :doc:`channel_update_tutorial`. And we also have a document that
-          talks through :doc:`config_update` which gives an overview of the
-          different kinds of updates that are possible as well as a fuller look
-          at the signature process.
+.. note:: 我们有两个文档，分别介绍了通道重新配置的不同方面。首先，我们有一个教程，将指导您完成 :doc:`channel_update_tutorial` 的过程。
+          我们还有一个文档，讨论了 :doc:`config_update`，该配置概述了可能的各种更新以及更全面的签名过程。
 
-Because new channels copy the configuration of the Orderer System Channel by
-default, new channels will automatically be configured to work with the orderer
-and channel capabilities of the Orderer System Channel and the application
-capabilities specified by the channel creation transaction. Channels that already
-exist, however, must be reconfigured.
 
-The schema for the Capabilities value is defined in the protobuf as:
+由于新通道默认复制Orderer系统通道的配置，因此将自动配置新通道，从而可以使用Orderer系统通道的排序功能和，通道功能以及通道创建事务指定的应用程序功能。
+但是，已存在的通道必须重新配置。
+
+功能值的模式在protobuf中定义为：
 
 .. code:: bash
 
@@ -98,7 +75,7 @@ The schema for the Capabilities value is defined in the protobuf as:
 
   message Capability { }
 
-As an example, rendered in JSON:
+作为示例，以JSON呈现：
 
 .. code:: bash
 
@@ -108,15 +85,13 @@ As an example, rendered in JSON:
       }
   }
 
-Capabilities in an Initial Configuration
+初始配置中的功能
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the ``configtx.yaml`` file distributed in the ``config`` directory of the release
-artifacts, there is a ``Capabilities`` section which enumerates the possible capabilities
-for each capability type (Channel, Orderer, and Application).
+在发布工件的 ``config`` 目录中的` `configtx.yaml`` 文件中，有一个``Capabilities``部分，
+它列出了每种功能类型（Channel，Orderer和Application）的可能功能。
 
-The simplest way to enable capabilities is to pick a v1.1 sample profile and customize
-it for your network. For example:
+启用功能的最简单方法是选择v1.1示例配置文件，并为您的网络自定义它。例如：
 
 .. code:: bash
 
@@ -134,14 +109,13 @@ it for your network. For example:
                 Organizations:
                     - *SampleOrg
 
-Note that there is a ``Capabilities`` section defined at the root level (for the channel
-capabilities), and at the Orderer level (for orderer capabilities). The sample above uses
-a YAML reference to include the capabilities as defined at the bottom of the YAML.
+请注意，在根级别（对于通道功能）和排序节点级别（对于orderer功能）定义了 ``Capabilities`` 部分。
+上面的示例使用YAML引用来包括YAML底部定义的功能。
 
-When defining the orderer system channel there is no Application section, as those
-capabilities are defined during the creation of an application channel. To define a new
-channel's application capabilities at channel creation time, the application admins should
-model their channel creation transaction after the ``SampleSingleMSPChannelV1_1`` profile.
+定义排序节点系统通道时，没有应用程序部分，因为这些功能是在创建应用程序通道期间定义的。
+要在创建通道时定义新通道的应用功能，应用管理员应在 ``SampleSingleMSPChannelV1_1`` 配置文件之后为其通道创建事务建模。
+
+
 
 .. code:: bash
 
@@ -153,12 +127,10 @@ model their channel creation transaction after the ``SampleSingleMSPChannelV1_1`
             Capabilities:
                 <<: *ApplicationCapabilities
 
-Here, the Application section has a new element ``Capabilities`` which references the
-``ApplicationCapabilities`` section defined at the end of the YAML.
+这里，Application部分有一个新元素 ``Capabilities``，它引用了在YAML末尾定义的 ``ApplicationCapabilities``  部分。
 
-.. note:: The capabilities for the Channel and Orderer sections are inherited from
-          the definition in the ordering system channel and are automatically included
-          by the orderer during the process of channel creation.
+
+.. note:: 注意Channel和Orderer部分的功能继承自排序系统通道中的定义，并且在创建通道的过程中由排序节点自动包含。
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
