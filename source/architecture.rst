@@ -1,4 +1,4 @@
-Architecture Reference
+结构参考
 ======================
 
 .. toctree::
