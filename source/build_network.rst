@@ -75,6 +75,7 @@ CLI超时参数(用-t标记指定)是可选的值；如果你不设置它，CLI�
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 准备好了吗？好的！执行下面的命令：
+
 .. code:: bash
 
   ./byfn.sh generate
@@ -834,7 +835,7 @@ BYFN示例提供了两种Docker Compose文件，它们都是从``docker-compose-
 使用CouchDB可以使用相同的chaincode函数，但是还添加了对状态数据库数据内容执行丰富复杂查询的功能，
 前提是要将chaincode数据建模为JSON。
 
-要使用CouchDB而不是默认数据库(goleveldb)，除了启动网络时传递``docker-compose-couch.yaml``外，
+要使用CouchDB而不是默认数据库(goleveldb)，除了启动网络时传递 ``docker-compose-couch.yaml`` 外，
 还需遵循前面描述的生成构件的相同过程:
 
 .. code:: bash
