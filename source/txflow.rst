@@ -1,114 +1,82 @@
-Transaction Flow
+交易流
 ================
 
-This document outlines the transactional mechanics that take place during a standard asset
-exchange.  The scenario includes two clients, A and B, who are buying and selling
-radishes.  They each have a peer on the network through which they send their
-transactions and interact with the ledger.
+本文概述了在标准资产交换过程中发生的交易机制。该场景包括两个客户，A和B，一个购买一个销售萝卜。
+他们每个人在网络上都有一个peer，通过peer发送交易并与分类帐进行交互。
 
 .. image:: images/step0.png
 
-**Assumptions**
+**假定**
 
-This flow assumes that a channel is set up and running.  The application user
-has registered and enrolled with the organization’s certificate authority (CA)
-and received back necessary cryptographic material, which is used to authenticate
-to the network.
+此流程假定通道被设置并运行。应用程序用户已经向组织的证书颁发机构(CA)注册和登记了，
+并接收回了用于向网络进行认证的必要密码材料。
 
-The chaincode (containing a set of key value pairs representing the initial
-state of the radish market) is installed on the peers and instantiated on the
-channel.  The chaincode contains logic defining a set of transaction
-instructions and the agreed upon price for a radish. An endorsement policy has
-also been set for this chaincode, stating that both ``peerA`` and ``peerB`` must endorse
-any transaction.
+链码（包含一组代表萝卜市场初始状态的键值对）安装在对等节点上并在通道上实例化。
+链码包含了定义一组交易指令的逻辑，还有萝卜的约定价格。
+这一链码也制定了一个背书策略，声明了 ``peerA`` 和 ``peerB`` 都必须背书任何交易。
 
 .. image:: images/step1.png
 
-1. **Client A initiates a transaction**
+1. **客户端A启动交易**
 
-What's happening? - Client A is sending a request to purchase radishes.  The
-request targets ``peerA`` and ``peerB``, who are respectively representative of
-Client A and Client B. The endorsement policy states that both peers must endorse
-any transaction, therefore the request goes to ``peerA`` and ``peerB``.
+发生了什么事？-客户A正在发送购买萝卜的请求。该请求以分别代表客户端A和客户端B的 ``peerA`` 和 ``peerB`` 为目标。
+背书策略规定两个peer都必须对任何交易进行背书，因此请求转到 ``peerA`` 和 ``peerB``。
 
-Next, the transaction proposal is constructed.  An application leveraging a supported
-SDK (Node, Java, Python) utilizes one of the available API's which generates a
-transaction proposal.  The proposal is a request to invoke a chaincode function
-so that data can be read and/or written to the ledger (i.e. write new key value
-pairs for the assets).  The SDK serves as a shim to package the transaction proposal
-into the properly architected format (protocol buffer over gRPC) and takes the user’s
-cryptographic credentials to produce a unique signature for this transaction proposal.
+接下来，构建交易提案。应用程序利用支持的SDK（Node，Java，Python）并使用一个可用的API来生成事务提案。
+该提案调用了链码函数的请求，以便数据能够被读取 和/或 写入分类账（即，为资产编写新的键值对）。
+SDK充当将交易提案打包为适当架构的格式（gRPC上的协议缓冲区）的垫片，
+并采用用户的密码凭证来为该交易提案生成唯一的签名。
 
 .. image:: images/step2.png
 
-2. **Endorsing peers verify signature & execute the transaction**
+2. **背书peer验证签名并执行事务**
 
-The endorsing peers verify (1) that the transaction proposal is well formed,
-(2) it has not been submitted already in the past (replay-attack protection),
-(3) the signature is valid (using MSP), and (4) that the
-submitter (Client A, in the example) is properly authorized to perform
-the proposed operation on that channel (namely, each endorsing peer ensures that
-the submitter satisfies the channel's *Writers* policy).
-The endorsing peers take the transaction proposal inputs as
-arguments to the invoked chaincode's function. The chaincode is then
-executed against the current state database to produce transaction
-results including a response value, read set, and write set.  No updates are
-made to the ledger at this point. The set of these values, along with the
-endorsing peer’s signature is passed back as a “proposal response” to the SDK
-which parses the payload for the application to consume.
+背书peer验证
++ (1)交易提案格式良好
++ (2)过去尚未提交(重放攻击保护)
++ (3)签名有效(使用MSP)
++ (4)提交者(示例中为客户端A)被适当授权，以在通道上执行提案的相关操作（即，每个背书peer确保提交者满足频道的 *写入（Writers）* 策略）
 
-.. note:: The MSP is a peer component that allows peers to verify
-          transaction requests arriving from clients and to sign transaction
-          results (endorsements). The writing policy is defined at channel
-          creation time and determines which users are entitled to submit a
-          transaction to that channel.
+背书peer将交易提案输入作为被调用的链码函数的参数。然后针对当前状态数据库执行链式处理，以产生事务结果，包括响应值、读集和写集。
+在这一系列操作里都没有更新账本。这些值的集合以及背书peer的签名会作为“交易响应”传递回SDK，SDK解析这些返回结果进行操作。
+
+.. note:: MSP是一个peer组件，它允许peer验证来自客户端的交易请求并签署交易结果（背书）。
+          写入策略在通道创建时定义，并确定哪些用户有权向该通道提交事务。
 
 .. image:: images/step3.png
 
-3. **Proposal responses are inspected**
+3. **提案响应被检查**
 
-The application verifies the endorsing peer signatures and compares the proposal
-responses to determine if the proposal responses are the same. If the chaincode only queried
-the ledger, the application would inspect the query response and would typically not
-submit the transaction to Ordering Service. If the client application intends to submit the
-transaction to Ordering Service to update the ledger, the application determines if the specified
-endorsement policy has been fulfilled before submitting (i.e. did peerA and peerB both endorse).
-The architecture is such that even if an application chooses not to inspect responses or otherwise
-forwards an unendorsed transaction, the endorsement policy will still be enforced by peers
-and upheld at the commit validation phase.
+应用程序验证peer签名，并比较提案响应，以确定提案响应是否相同。
+如果链码只查询分类账，则应用程序将检查查询响应，并且通常不会将交易提交给排序服务。
+如果client应用程序打算将事务提交给排序服务以更新账本，则应用程序确定在提交之前是否已经执行了指定的背书策略（即，peerA和peerB是否都认可）。
+该体系结构使得：即使应用程序不检查响应或以其他方式转发未背书的交易，背书策略仍将由peer强制执行，并在提交验证阶段得到维护。
 
 .. image:: images/step4.png
 
-4. **Client assembles endorsements into a transaction**
+4. **客户端将背书组装到一个交易里**
 
-The application “broadcasts” the transaction proposal and response within a
-“transaction message” to the Ordering Service. The transaction will contain the
-read/write sets, the endorsing peers signatures and the Channel ID.  The
-Ordering Service does not need to inspect the entire content of a transaction in order to perform
-its operation, it simply receives
-transactions from all channels in the network, orders them chronologically by
-channel, and creates blocks of transactions per channel.
+应用程序在“交易消息”中向排序服务“广播”交易提案和响应。
+交易将包含 读/写 集、背书peer签名和通道ID。
+排序服务不需要检查交易的全部内容以便执行其操作，它只需要从网络中的所有通道接收交易，
+分通并按照时间的前后顺序排列他们，并创建每个通道的事务块。
 
 .. image:: images/step5.png
 
-5. **Transaction is validated and committed**
+5. **交易被验证并提交**
 
-The blocks of transactions are “delivered” to all peers on the channel.  The
-transactions within the block are validated to ensure endorsement policy is
-fulfilled and to ensure that there have been no changes to ledger state for read
-set variables since the read set was generated by the transaction execution.
-Transactions in the block are tagged as being valid or invalid.
+交易块被“传递”到通道上的所有peer。
+块内的交易被验证以确保执行了背书策略，并确保自交易执行生成读取集以来，读取集变量的在家啊没好呢么状态没有变化。
+块中的事务会被标记为有效或无效。
 
 .. image:: images/step6.png
 
-6. **Ledger updated**
+6. **更新账本**
 
-Each peer appends the block to the channel’s chain, and for each valid transaction
-the write sets are committed to current state database. An event is emitted, to
-notify the client application that the transaction (invocation) has been
-immutably appended to the chain, as well as notification of whether the
-transaction was validated or invalidated.
-
+每个peer将块附加到通道链，对于每个有效交易，写入集被提交到当前状态数据库。
+一个事件被发出来，以通知客户端应用程序两个消息：
++ 交易（调用）已经不可改变地附加到链中
++ 交易是被验证为有效还是无效
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
