@@ -262,6 +262,7 @@ Cryptogen假定文件 - ``crypto-config.yaml`` -
 其包含网络拓扑并让我们可以为组织和组织下属的组件生成一系列证书和密钥。
 每个组织都又一个唯一的根证书 (``ca-cert``)，这个证书将特定的组件（对等节点和排序节点）绑定到组织里。
 通过给每个组织分配唯一的根证书，我们模拟了一个典型的网络，该网络中参与 :ref:`Member` 将会使用自己的证书授权。
+通过给每个组织分配唯一的根证书，我们模拟了一个典型的网络，该网络中参与 :ref:`Member` 将会使用自己的证书授权。
 Hyperledger Fabric里的事务和交流，是通过实体的私钥 (``keystore``) 签名的，然后通过公钥 (``signcerts``) 来验证。
 
 你会发现该文件里有一个 ``count`` 变量。我们使用它来指明每个组织中的对等节点的数量；
@@ -566,6 +567,7 @@ docker-compose会引用我们之前下载的镜像,并且通过我们之前生�
 注意，我们不是修改genesis块，而是简单地将增量（deltas）添加到将定义锚点peer的链中。
 
 更新通道定义，将Org1的锚点peer定义为``peer0.org1.example.com``：
+
 .. code:: bash
 
   peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org1MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
@@ -611,7 +613,7 @@ docker-compose会引用我们之前下载的镜像,并且通过我们之前生�
 接下来，在通道上实例化链码。这将在通道上初始化链码，为链码设置背书策略，并为目标peer启动链码容器。
 注意 ``-P`` 参数。这是我们的策略，在此策略中，我们针对要验证的链码指定事务所需的背书级别。
 
-在下面的命令中，您会注意到我们将策略指定为``-P "AND ('Org1MSP.peer','Org2MSP.peer')"``。
+在下面的命令中，您会注意到我们将策略指定为 ``-P "AND ('Org1MSP.peer','Org2MSP.peer')"`` 。
 这意味着我们需要来自Org1 ***和** Org2的peer的“背书”(即两个背书)。
 如果我们将语法更改为``OR``，那么我们只需要一个背书。
 
