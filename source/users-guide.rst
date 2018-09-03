@@ -1960,173 +1960,170 @@ issuing the following command.
 
     fabric-ca-client affiliation list
 
-Manage Certificates
+管理证书
 ~~~~~~~~~~~~~~~~~~~~
 
-This section describes how to use fabric-ca-client to manage certificates.
+本节介绍如何使用Fabric CA客户端管理证书。调用方可见的证书包括：
 
-Listing certificate information
+列出证书信息
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The certificates that are visible to a caller include:
 
-  - Those certificates which belong to the caller
-  - If the caller possesses the ``hf.Registrar.Roles`` attribute or the ``hf.Revoker`` attribute with a value of ``true``,
-    all certificates which belong to identities in and below the caller's affiliation. For example, if the client's
-    affiliation is ``a.b``, the client may get certificates for identities who's affiliation
-    is ``a.b`` or ``a.b.c`` but not ``a`` or ``a.c``.
 
-If executing a list command that requests certificates of more than one identity, only certificates of identities
-with an affiliation that is equal to or hierarchically below the caller's affiliation will be listed.
+调用方可见的证书包括：
 
-The certificates which will be listed may be filtered based on ID, AKI, serial number, expiration time, revocation time, notrevoked, and notexpired flags.
+  - 属于调用者的证书
+  - 如果调用方拥有值为true的 ``hf.Registrar.Roles`` 属性或 ``hf.Revoker`` 属性，
+    则所有属于调用方从属关系之内及之下的身份的证书。例如，如果客户的关联是 ``a.b``，
+    则客户可以获得属于 ``a.b`` 或 ``a.b.c``，
+    但不是 ``a`` 或 ``a.c`` 的身份证书。
 
-* ``id``: List certificates for this enrollment ID
-* ``serial``: List certificates that have this serial number
-* ``aki``: List certificates that have this AKI
-* ``expiration``: List certificates that have expiration dates that fall within this expiration time
-* ``revocation``: List certificates that were revoked within this revocation time
-* ``notrevoked``: List certificates that have not yet been revoked
-* ``notexpired``: List certificates that have not yet expired
+如果执行请求多个身份（identity）的证书的列表命令，则将只列出具有与调用者的附属（affiliation）相等或下属的附属的身份证书。
 
-You can use flags ``notexpired`` and ``notrevoked`` as filters to exclude revoked certificates and/or expired certificates from the result set.
-For example, if you only care about certificates that have expired but have not been revoked you can use the ``expiration`` and ``notrevoked`` flags to
-get back such results. An example of this case is provided below.
+将列出的证书可以基于ID、AKI、序列号、过期时间、撤销时间、notrevoked和notexpired标志进行筛选。
 
-Time should be specified based on RFC3339. For instance, to list certificates that have expirations between
-March 1, 2018 at 1:00 PM and June 15, 2018 at 2:00 AM, the input time string would look like 2018-03-01T13:00:00z
-and 2018-06-15T02:00:00z. If time is not a concern, and only the dates matter, then the time part can be left
-off and then the strings become 2018-03-01 and 2018-06-15.
+* ``id``: 列出这个注册ID的证书
+* ``serial``: 列出具有这个序列号的证书
+* ``aki``: 列出具有这个AKI的证书
+* ``expiration``: 列出到期日期在该到期时间内的证书
+* ``revocation``: 列出在该吊销时间内撤销的证书
+* ``notrevoked``: 列出尚未被撤销的证书
+* ``notexpired``: 列出尚未过期的证书
 
-The string ``now`` may be used to denote the current time and the empty string to denote any time. For example, ``now::`` denotes
-a time range from now to any time in the future, and ``::now`` denotes a time range from any time in the past until now.
+可以使用 ``notexpired`` 和 ``notrevoked`` 标志作为筛选器，从结果集中排除撤销的证书 和/或 过期证书。
+例如，如果只关心已经过期但尚未撤销的证书，则可以使用 ``expiration`` 标志和 ``notrevoked`` 标志来返回这样的结果。
 
-The following command shows how to list certificates using various filters.
+下面提供了这种情况的一个例子。时间应根据RFC3339指定。
+例如，为了列出在2018年3月1日下午1点到2018年6月15日上午2点之间到期的证书，
+输入的时间串就看起来像 2018-03-01T13:00:00z 和2 2018-06-15T02:00:00z 。
+如果具体时分秒不是考虑事项，只有日期才重要，那么时间部分便被去掉，
+字符串成为 2018—03-01 和 2018—06—15。
 
-List all certificates:
+字符串 ``now`` 现在可以用来表示当前时间，而空字符串来表示任何时间。
+例如，``now::`` 表示从现在到将来的任何时间的时间范围，而 `::now` 表示从过去到现在的任何时间的时间范围。
+
+下面的命令演示如何使用各种筛选器列出证书。
+
+列出所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list
 
-List all certificates by id:
+按ID列出所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin
 
-List certificate by serial and aki:
+通过serial和AKI列出证书：te by serial and aki:
 
 .. code:: bash
 
  fabric-ca-client certificate list --serial 1234 --aki 1234
 
-List certificate by id and serial/aki:
+用ID和serial/AKI列出证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --serial 1234 --aki 1234
 
-List certificates that are neither revoker nor expired by id:
+通过ID列出既没撤销，也没过期的证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --notrevoked --notexpired
 
-List all certificates that have not been revoked for an id (admin):
+列出某个ID（管理员）没取消的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --notrevoked
 
-List all certificates have not expired for an id (admin):
+列出某个ID（管理员）没有过期的证书：
 
-The "--notexpired" flag is equivalent to "--expiration now::", which means certificates
-will expire some time in the future.
+"--notexpired" 标志相当于 "--expiration now::" ，这意味着证书将在未来某个时间过期。
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --notexpired
 
-List all certificates that were revoked between a time range for an id (admin):
+列出某个ID（admin）在某个时间段内吊销的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --revocation 2018-01-01T01:30:00z::2018-01-30T05:00:00z
 
-List all certificates that were revoked between a time range but have not expired for an id (admin):
+列出某个ID(admin)在的某时间范围内吊销但未过期的所有证书（管理员）：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --revocation 2018-01-01::2018-01-30 --notexpired
 
-List all revoked certificates using duration (revoked between 30 days and 15 days ago) for an id (admin):
+列出某个ID（admin）在某段时间（在30天和15天前过期）内吊销的证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --revocation -30d::-15d
 
-List all revoked certificates before a time
+列出在某个时间前过期的所有证书
 
 .. code:: bash
 
  fabric-ca-client certificate list --revocation ::2018-01-30
 
-List all revoked certificates after a time
+列出在某个时间之后吊销的所有证书
 
 .. code:: bash
 
  fabric-ca-client certificate list --revocation 2018-01-30::
 
-List all revoked certificates before now and after a certain date
+列出在在今天和之前某个时间点之间过吊销的所有证书
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --revocation 2018-01-30::now
 
-List all certificate that expired between a time range but have not been revoked for an id (admin):
+列出某个ID（admin）在某个时间段内过期但未吊销的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --expiration 2018-01-01::2018-01-30 --notrevoked
 
-List all expired certificates using duration (expired between 30 days and 15 days ago) for an id (admin):
+列出某个ID（admin）在某段时间（在30天和15天前过期）内过期的证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --expiration -30d::-15d
 
-List all certificates that have expired or will expire before a certain time
+列出已经过期，或在某个特定时间前会过期的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --expiration ::2058-01-30
 
-List all certificates that have expired or will expire after a certain time
+列出已经过期，或在某个特定时间后会过期的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --expiration 2018-01-30::
 
-List all expired certificates before now and after a certain date
+列出在此刻之前在某刻之后过期的所有证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --expiration 2018-01-30::now
 
-List certificates expiring in the next 10 days:
+列出在接下来的十天内会过期的证书：
 
 .. code:: bash
 
  fabric-ca-client certificate list --id admin --expiration ::+10d --notrevoked
 
-The list certificate command can also be used to store certificates on the file
-system. This is a convenient way to populate the admins folder in an MSP, The "-store" flag
-points to the location on the file system to store the certificates.
+列表证书命令也可用于在文件系统上存储证书。这是在MSP中填充admins文件夹的简便方法，
+"-store" 标志指向文件系统上存储证书的位置。
 
-Configure an identity to be an admin, by storing certificates for an identity
-in the MSP:
-
+通过在MSP中存储身份标识，将身份配置为管理员（admin）：
 .. code:: bash
 
  export FABRIC_CA_CLIENT_HOME=/tmp/clientHome
