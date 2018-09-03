@@ -57,16 +57,15 @@ Fabric 证书授权机构 (Fabric Certificate Authority：CA)颁发组织认证�
 [交易](../glossary.html#transaction)[提案](../glossary.html#proposal)，
 peer使用它们来对提案进行背书，如果交易有效，则将交易提交到分类账。
 
-
 ![network.structure](./network.diagram.1_1.png)
 
-*该图的解释如下：
+该图的解释如下：
 + 有一个具有网络策略NP1和排序服务O的Fabric网络N，通道C1由通道策略CP1控制。
 + C1已经由联盟RARB建立。
 + 信道C1通过排序服务O来管理，peerP1和P2以及客户端应用程序A1和A2已经被授予在C1上进行交易的权限。
 + 客户端应用程序A1由组织RA拥有。证书颁发机构CA1为组织RA服务。
 + 对等体P2保存了与通道C1相关的账本L1，及与通道C2相关联的账本L2。
-+ 对等体P2还使用了链码S4和S5。排序服务O的排序节点由组织RD拥有。*
++ 对等体P2还使用了链码S4和S5。排序服务O的排序节点由组织RD拥有。
 
 ## 创建网络
 
