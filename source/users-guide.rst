@@ -54,19 +54,19 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
    7. `Generating a CRL (Certificate Revocation List)`_
    8. `Attribute-Based Access Control`_
    9. `Dynamic Server Configuration Update`_
-   10. `Enabling TLS`_
+   10. `启用TLS`_
    11. `Contact specific CA instance`_
 
 6. `HSM`_
 
    1. `Configuring Fabric CA server to use softhsm2`_
 
-7. `File Formats`_
+7. `文件格式`_
 
-   1. `Fabric CA server's configuration file format`_
-   2. `Fabric CA client's configuration file format`_
+   1. `Fabric CA 服务器的配置文件格式`_
+   2. `Fabric CA 客户端的的配置文件格式`_
 
-8. `Troubleshooting`_
+8. `故障排除`_
 
 总览
 --------
@@ -1470,8 +1470,8 @@ to ``true`` and restart the Fabric CA server. The Fabric CA client will handle e
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
     fabric-ca-client gencrl -M ~/msp
 
-下一个命令将创建包含所有特定证书（过期和未过期）的CRL，这些证书在2017～0913T16:39：55-0800（由 `--revokedafter` 标志指定）之后，
-在2017～0921T16:39：55-0800（由 `--revokedbefore` 指定）之前。CRL存储在 `~/msp/crls/crl.pem` 文件中。
+下一个命令将创建包含所有特定证书（过期和未过期）的CRL，这些证书在2017～0913T16:39:55-0800（由 `--revokedafter` 标志指定）之后，
+在2017～0921T16:39:55-0800（由 `--revokedbefore` 指定）之前。CRL存储在 `~/msp/crls/crl.pem` 文件中。
 
 .. code:: bash
 
@@ -1500,12 +1500,11 @@ gencrl命令还将接受 `--expireafter` 和 `--expirebefore` 标记，
 示例演示如何生成包含被撤销的用户所拥有证书的CRL并更新通道msp。
 然后，将证明使用撤销的用户凭据来查询通道，将导致授权错误。
 
-Enabling TLS
-~~~~~~~~~~~~
+启用TLS
+~~~~~
 
-This section describes in more detail how to configure TLS for a Fabric CA client.
-
-The following sections may be configured in the ``fabric-ca-client-config.yaml``.
+本节将更详细地描述如何为Fabric CA客户端配置TLS。
+以下部分可以配置在 ``fabric-ca-client-config.yaml`` 中。
 
 .. code:: yaml
 
@@ -1518,13 +1517,10 @@ The following sections may be configured in the ``fabric-ca-client-config.yaml``
         certfile: tls_client-cert.pem
         keyfile: tls_client-key.pem
 
-The **certfiles** option is the set of root certificates trusted by the
-client. This will typically just be the root Fabric CA server's
-certificate found in the server's home directory in the **ca-cert.pem**
-file.
+**certfiles** 选项是客户端信任的根证书的集合。
+这通常就是服务器home目录中找到的根Fabric CA服务器证书，即**ca-cert.pem**文件。
 
-The **client** option is required only if mutual TLS is configured on
-the server.
+只有在服务器上配置mutual TLS时才需要 **client** 选项。
 
 Attribute-Based Access Control
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2104,96 +2100,90 @@ FABRIC_CA_SERVER_BCCSP_PKCS11_LABEL=ForFabric
 
 `回到顶端`_
 
-File Formats
+文件格式
 ------------
 
-Fabric CA server's configuration file format
+Fabric CA 服务器的配置文件格式
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A default configuration file is created in the server's home directory
-(see `Fabric CA Server <#server>`__ section for more info). The following
-link shows a sample :doc:`Server configuration file <serverconfig>`.
+默认配置文件是在服务器的主目录中创建的
+（请参阅`Fabric CA Server <#server>`__ 部分以获取更多信息）。
+下面的链接显示了一个示例 :doc:`Server configuration file <serverconfig>`。
 
-Fabric CA client's configuration file format
+Fabric CA 客户端的的配置文件格式
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A default configuration file is created in the client's home directory
-(see `Fabric CA Client <#client>`__ section for more info). The following
-link shows a sample :doc:`Client configuration file <clientconfig>`.
-
+默认配置文件是在客户端的主目录中创建的（
+请参阅`Fabric CA Server <#server>`__ 部分以获取更多信息）。
+下面的链接显示了一个示例 :doc:`Server configuration file <serverconfig>`。
 `回到顶端`_
 
-Troubleshooting
+故障排除
 ---------------
 
-1. If you see a ``Killed: 9`` error on OSX when trying to execute
-   ``fabric-ca-client`` or ``fabric-ca-server``, there is a long thread
-   describing this problem at https://github.com/golang/go/issues/19734.
-   The short answer is that to work around this issue, you can run the
-   following command::
+1. 如果您在试图执行 ``fabric-ca-client`` 或 ``fabric-ca-server`` 时在OSX上看到 ``Killed: 9`` 错误，
+   那么在 https://github.com/golang/go/issues/19734. 有一个长线程描述这个问题。
+   简短的答案是，为了解决这个问题，您可以运行以下命令::
 
     # sudo ln -s /usr/bin/true /usr/local/bin/dsymutil
 
-2. The error ``[ERROR] No certificates found for provided serial and aki`` will occur
-   if the following sequence of events occurs:
+2. 如果下面的事情发生，那么错误 ``[ERROR] No certificates found for provided serial and aki`` 就会出现：
 
-   a. You issue a `fabric-ca-client enroll` command, creating an enrollment certificate (i.e. an ECert).
-      This stores a copy of the ECert in the fabric-ca-server's database.
-   b. The fabric-ca-server's database is deleted and recreated, thus losing the ECert from step 'a'.
-      For example, this may happen if you stop and restart a docker container hosting the fabric-ca-server,
-      but your fabric-ca-server is using the default sqlite database and the database file is not stored
-      on a volume and is therefore not persistent.
-   c. You issue a `fabric-ca-client register` command or any other command which tries to use the ECert from
-      step 'a'.  In this case, since the database no longer contains the ECert, the
-      ``[ERROR] No certificates found for provided serial and aki`` will occur.
+   a. 你使用了 `fabric-ca-client enroll` 命令，创建了一个注册证书, (即ECert)。
+      这将在fabric-ca-server的数据库里存储一个ECert的拷贝。
+   b. 如果删除并重建fabric-ca-server的数据库，就会丢失步骤'a'里的ECert。
+      比如说，如果你停止并重新启动了承载fabric-ca-server的docker容器，
+      fabric-ca-server却使用了默认的sqlite数据库，但是数据库文件却没有存储在卷上，因此未持久化存储，
+      这样一来，错误就发生了。
+   c. 你使用了 `fabric-ca-client register` 命令，或者其他命令，来尝试使用步骤'a'里的ECert 。
+      在这种情况下，因为数据库不再包含ECert,
+      ``[ERROR] No certificates found for provided serial and aki`` 就发生了。
 
-   To resolve this error, you must enroll again by repeating step 'a'.  This will issue a new ECert
-   which will be stored in the current database.
+例如，如果停止并重新启动承载fabric-ca-server的docker容器，但是.-ca-server正在使用默认sqlite数据库，并且数据库文件没有存储在卷上，因此不持久，则可能发生这种情况。
+0
+   若要解决此错误，必须通过重复步骤“a”再次注册。这将发布一个新的ECert，并且被存储在当前数据库中。
 
-3. When sending multiple parallel requests to a Fabric CA Server cluster that uses shared sqlite3 databases,
-   the server occasionally returns a 'database locked' error. This is most probably because the database
-   transaction timed out while waiting for database lock (held by another cluster member) to be released.
-   This is an invalid configuration because sqlite is an embedded database, which means the Fabric CA server
-   cluster must share the same file via a shared file system, which introduces a SPoF (single point of failure),
-   which contradicts the purpose of cluster topology. The best practice is to use either Postgres or MySQL
-   databases in a cluster topology.
+3. 当向使用共享sqlite3数据库的Fabric CA Server集群发送多个并行请求时，
+   服务器偶尔会返回一个'database locked'错误。这很可能是因为在等待释放数据库锁（由另一个集群成员持有）时，
+   数据库事务超时。这是一个无效的配置，因为SQLite是一个嵌入式数据库，
+   这意味着，Fabric C CA服务器集群必须通过共享文件系统共享相同的文件，
+   该文件引入了SPOF（single point of failure：单点故障），这与集群拓扑的目的相矛盾。
+   最好的做法是在集群拓扑中使用Postgres或MySQL数据库。
 
-4. Suppose an error similar to
+4. 假设这样的错误
    ``Failed to deserialize creator identity, err The supplied identity is not valid, Verify() returned x509: certificate signed by unknown authority``
-   is returned by a peer or orderer when using an enrollment certificate issued by the Fabric CA Server.  This indicates that
-   the signing CA certificate used by the Fabric CA Server to issue certificates does not match a certificate in the `cacerts` or `intermediatecerts`
-   folder of the MSP used to make authorization checks.
+   由peer或排序节点在使用Fabric CA服务器颁发的注册证书时返回。
+   这表示Fabric CA 服务器用于颁发证书的签名CA证书，与用于进行授权检查的MSP的 `cacerts` 或 `intermediatecerts` 文件夹中的证书不匹配。
 
-   The MSP which is used to make authorization checks depends on which operation you were performing when the error occurred.
-   For example, if you were trying to install chaincode on a peer, the local MSP on the file system of the peer is used;
-   otherwise, if you were performing some channel specific operation such as instantiating chaincode on a specific channel,
-   the MSP in the genesis block or the most recent configuration block of the channel is used.
+   用于授权检查的MSP取决于您在错误发生时执行的操作。
+   例如，如果试图在peer上安装chaincode，则使用peer文件系统上的本地MSP；
+   否则，如果正在执行某些特定于通道的操作（例如在特定通道上实例化chaincode），那么则使用genesis块中的MSP或最新使用的N个通道配置块。
 
-   To confirm that this is the problem, compare the AKI (Authority Key Identifier) of the enrollment certificate
-   to the SKI (Subject Key Identifier) of the certificate(s) in the `cacerts` and `intermediatecerts` folder of appropriate MSP.
-   The command `openssl x509 -in <PEM-file> -noout -text | grep -A1 "Authority Key Identifier"` will display the AKI and
-   `openssl x509 -in <PEM-file> -noout -text | grep -A1 "Subject Key Identifier"` will display the SKI.
-   If they are not equal, you have confirmed that this is the cause of the error.
+   为了确认确实是这个问题，比较下面两者：
+   + 注册证书的AKI（授权密钥标志符）
+   + 适当MSP内 `cacerts` 和 `intermediatecerts` 文件夹下的证书SKI(Subject Key Identifier)
 
-   This can happen for multiple reasons including:
+   命令 `openssl x509 -in <PEM-file> -noout -text | grep -A1 "Authority Key Identifier"` 将会展示AKI，而
+   `openssl x509 -in <PEM-file> -noout -text | grep -A1 "Subject Key Identifier"` 将会展示 SKI。
+   如果他们不相同，你就可以肯定这确实就是问题所在了。
 
-   a. You used `cryptogen` to generate your key material but did not start `fabric-ca-server` with the signing key and certificate generated
-      by `cryptogen`.
+   可能发生的多种原因包括：
 
-      To resolve (assuming `FABRIC_CA_SERVER_HOME` is set to the home directory of your `fabric-ca-server`):
+   a. 你使用了 `cryptogen` 来生成你的密钥材料，但是却没有使用其生成的签名密钥和证书来启动 `fabric-ca-server`。
 
-      1. Stop `fabric-ca-server`.
-      2. Copy `crypto-config/peerOrganizations/<orgName>/ca/*pem` to `$FABRIC_CA_SERVER_HOME/ca-cert.pem`.
-      3. Copy `crypto-config/peerOrganizations/<orgName>/ca/*_sk` to `$FABRIC_CA_SERVER_HOME/msp/keystore/`.
-      4. Start `fabric-ca-server`.
-      5. Delete any previously issued enrollment certificates and get new certificates by enrolling again.
+      为了解决问题 (假定 `FABRIC_CA_SERVER_HOME` 设定为你 `fabric-ca-server` 的home目录):
 
-   b. You deleted and recreated the CA signing key and certificate used by the Fabric CA Server after generating the genesis block.
-      This can happen if the Fabric CA Server is running in a docker container, the container was restarted, and its home directory
-      is not on a volume mount.  In this case, the Fabric CA Server will create a new CA signing key and certificate.
+      1. 关闭 `fabric-ca-server`.
+      2. 拷贝 `crypto-config/peerOrganizations/<orgName>/ca/*pem` 到 `$FABRIC_CA_SERVER_HOME/ca-cert.pem`.
+      3. 拷贝 `crypto-config/peerOrganizations/<orgName>/ca/*_sk` 到 `$FABRIC_CA_SERVER_HOME/msp/keystore/`.
+      4. 启动 `fabric-ca-server`.
+      5. 删除所有之前发行的注册证书并且重新注册来获取新证书。
 
-      Assuming that you can not recover the original CA signing key, the only way to recover from this scenario is to update the
-      certificate in the `cacerts` (or `intermediatecerts`) of the appropriate MSPs to the new CA certificate.
+   b. 在生成创世纪块之后，您删除并重新创建了由Fabric CA服务器使用的CA签名密钥和证书。
+      如果Fabric CA Server在docker容器中运行，容器被重新启动，并且其主目录不在卷挂载上，则可能发生这种情况。
+      在这种情况下，Fabric CA服务器将创建新的CA签名密钥和证书。
+
+      假设您无法恢复原始CA签名密钥，从此场景恢复的唯一方法是将适当MSP的 `cacerts`（或 `intermediatecerts` ）中的证书更新为新的CA证书。
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
