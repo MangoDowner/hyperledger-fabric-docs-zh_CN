@@ -22,6 +22,7 @@ modularity and versatility for a broad set of industry use cases.
    tutorials
    ops_guide
    command_ref
+   users-guide
    architecture
    Fabric-FAQ
    CONTRIBUTING
