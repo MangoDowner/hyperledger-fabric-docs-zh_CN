@@ -32,25 +32,25 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
 
    1. `文件路径`_
 
-4. `Fabric CA Server`_
+4. `Fabric CA 服务器`_
 
-   1. `Initializing the server`_
-   2. `Starting the server`_
-   3. `Configuring the database`_
-   4. `Configuring LDAP`_
+   1. `初始化服务器`_
+   2. `启动服务器`_
+   3. `配置数据库`_
+   4. `配置LDAP`_
    5. `Setting up a cluster`_
-   6. `Setting up multiple CAs`_
-   7. `Enrolling an intermediate CA`_
-   8. `Upgrading the server`_
+   6. `启动多CA`_
+   7. `注册中间CA`_
+   8. `升级服务器`_
 
-5. `Fabric CA Client`_
+5. `Fabric CA 客户端`_
 
-   1. `Enrolling the bootstrap identity`_
+   1. `注册启动身份`_
    2. `Registering a new identity`_
    3. `Enrolling a peer identity`_
    4. `Getting a CA certificate chain from another Fabric CA server`_
-   5. `Reenrolling an identity`_
-   6. `Revoking a certificate or identity`_
+   5. `重新注册身份`_
+   6. `吊销证书或身份`_
    7. `Generating a CRL (Certificate Revocation List)`_
    8. `Attribute-Based Access Control`_
    9. `Dynamic Server Configuration Update`_
@@ -119,8 +119,7 @@ Hyperledger Fabric CA客户端或SDK可以连接到Hyperledger Fabric CA服务�
 想要了解libltdl-dev的更多内容，查阅 https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html.
 
 安装
-~~~~~~~
-
+~~~~~~~~~~~~~~~
 接下来的命令在 $GOPATH/bin 里安装 `fabric-ca-server` 和 `fabric-ca-client` 程序
 
 .. code:: bash
@@ -153,7 +152,7 @@ Hyperledger Fabric CA客户端或SDK可以连接到Hyperledger Fabric CA服务�
 
     fabric-ca-server start -b admin:adminpw
 
-`-b` 选项为启动管理员提供了注册（enrollment）ID和密码；如果LDAP没有启用“ldap.enabled”设置，则需要这样做。
+`-b` 选项为引导管理员提供了注册（enrollment）ID和密码；如果LDAP没有启用“ldap.enabled”设置，则需要这样做。
 
 在本地目录中创建名为 `fabric-ca-server-config.yaml` 的配置文件，该目录也是可配置的。
 
@@ -193,9 +192,6 @@ Docker Hub
 
 如果compose文件中指定的fabric-ca映像不存在，则将拉取该映像，并启动fabric-ca服务器的实例。
 
-建立自己的码头工人形象您可以通过DOCKE撰写并启动服务器，如下所示。
-
-
 创建你自己的Docker镜像
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -209,6 +205,8 @@ Docker Hub
     docker-compose up -d
 
 hyperledger/fabric-ca 镜像包含了fabric-ca-server和fabric-ca-client。
+
+
 
 .. code:: bash
 
@@ -236,18 +234,17 @@ hyperledger/fabric-ca 镜像包含了fabric-ca-server和fabric-ca-client。
 配置设置
 ---------------
 
-The Fabric CA provides 3 ways to configure settings on the Fabric CA server
-and client. The precedence order is:
+Fabric CA提供3种方式来配置Fabric CA服务器和客户机上的设置。
+优先顺序为：
 
-  1. CLI flags
-  2. Environment variables
-  3. Configuration file
+  1. CLI标志
+  2. 环境变量
+  3. 配置文件
 
-In the remainder of this document, we refer to making changes to
-configuration files. However, configuration file changes can be
-overridden through environment variables or CLI flags.
+在本文档的其余部分中，我们提到对配置文件进行更改。
+但是，配置文件更改可以通过环境变量或CLI标志重写。
 
-For example, if we have the following in the client configuration file:
+例如，如果在客户端配置文件中有以下内容：
 
 .. code:: yaml
 
@@ -261,36 +258,29 @@ For example, if we have the following in the client configuration file:
         certfile: cert.pem
         keyfile:
 
-The following environment variable may be used to override the ``cert.pem``
-setting in the configuration file:
+下面的环境变量可用于覆盖配置文件中的 ``cert.pem`` 设置：
 
 .. code:: bash
 
   export FABRIC_CA_CLIENT_TLS_CLIENT_CERTFILE=cert2.pem
 
-If we wanted to override both the environment variable and configuration
-file, we can use a command line flag.
+如果我们想重写环境变量和配置文件，我们可以使用命令行标志。
 
 .. code:: bash
 
   fabric-ca-client enroll --tls.client.certfile cert3.pem
 
-The same approach applies to fabric-ca-server, except instead of using
-``FABIRC_CA_CLIENT`` as the prefix to environment variables,
-``FABRIC_CA_SERVER`` is used.
+同样的方法也适用于fabric-ca-server，除了使用了 ``FABRIC_CA_SERVER`` 而不是 ``FABIRC_CA_CLIENT`` 作为环境变量的前缀。
 
 .. _server:
 
 文件路径
 ~~~~~~~~~~~~~~~
-All the properties in the Fabric CA server and client configuration file
-that specify file names support both relative and absolute paths.
-Relative paths are relative to the config directory, where the
-configuration file is located. For example, if the config directory is
-``~/config`` and the tls section is as shown below, the Fabric CA server
-or client will look for the ``root.pem`` file in the ``~/config``
-directory, ``cert.pem`` file in the ``~/config/certs`` directory and the
-``key.pem`` file in the ``/abs/path`` directory
+
+Fabric CA服务器和客户端配置文件中指定文件名的所有属性都支持相对路径和绝对路径。
+相对路径与配置文件所在的配置目录相对。例如，如果配置目录是 ``~/config``  ，并且tls部分如下所示，
+则Fabric CA服务器或客户端将在``~/config`` 目录中查找 ``cert.pem``文件、
+``~/config/certs`` 目录中的 ``cert.pem`` 文件和 ``/abs/path`` 目录中的 ``key.pem`` 文件
 
 .. code:: yaml
 
@@ -304,9 +294,7 @@ directory, ``cert.pem`` file in the ``~/config/certs`` directory and the
 
 `回到顶端`_
 
-
-
-Fabric CA Server
+Fabric CA 服务器
 ----------------
 
 This section describes the Fabric CA server.
@@ -334,21 +322,19 @@ in the server's home directory.
 
 .. _initialize:
 
-Initializing the server
+初始化服务器
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Initialize the Fabric CA server as follows:
+通过如下方式初始化abric CA服务器:
 
 .. code:: bash
 
     fabric-ca-server init -b admin:adminpw
 
-The ``-b`` (bootstrap identity) option is required for initialization when
-LDAP is disabled. At least one bootstrap identity is required to start the
-Fabric CA server; this identity is the server administrator.
+当禁用LDAP时，需要初始化``-b``（启动身份）选项。启动Fabric CA服务器需要至少一个引导身份；
+该身份是服务器管理员。
 
-The server configuration file contains a Certificate Signing Request (CSR)
-section that can be configured. The following is a sample CSR.
+服务器配置文件包含可配置的证书签名请求（CSR）部分。下面是CSR示例。
 
 .. _csr-fields:
 
@@ -368,48 +354,37 @@ section that can be configured. The following is a sample CSR.
       expiry: 131400h
       pathlength: 1
 
-All of the fields above pertain to the X.509 signing key and certificate which
-is generated by the ``fabric-ca-server init``.  This corresponds to the
-``ca.certfile`` and ``ca.keyfile`` files in the server's configuration file.
-The fields are as follows:
+以上所有字段都属于X.509签名密钥和证书，该证书是由 ``fabric-ca-server init`` 生成的。
+这对应于服务器配置文件中的 ``ca.certfile`` 和 ``ca.keyfile`` 文件。字段如下：
 
-  -  **cn** is the Common Name
-  -  **O** is the organization name
-  -  **OU** is the organizational unit
-  -  **L** is the location or city
-  -  **ST** is the state
-  -  **C** is the country
+  -  **cn** 是公共名字
+  -  **O** 是组织名字
+  -  **OU** 是组织单元
+  -  **L** 是城市位置
+  -  **ST** 是洲（state）名
+  -  **C** 是国家名
 
-If custom values for the CSR are required, you may customize the configuration
-file, delete the files specified by the ``ca.certfile`` and ``ca.keyfile``
-configuration items, and then run the ``fabric-ca-server init -b admin:adminpw``
-command again.
+如果需要CSR的自定义值，则可以自定义配置文件，删除 ``ca.certfile`` 和 ``ca.keyfile`` 配置项指定的文件，
+然后再次运行 ``fabric-ca-server init -b admin:adminpw`` 命令。
 
-The ``fabric-ca-server init`` command generates a self-signed CA certificate
-unless the ``-u <parent-fabric-ca-server-URL>`` option is specified.
-If the ``-u`` is specified, the server's CA certificate is signed by the
-parent Fabric CA server.
-In order to authenticate to the parent Fabric CA server, the URL must
-be of the form ``<scheme>://<enrollmentID>:<secret>@<host>:<port>``, where
-<enrollmentID> and <secret> correspond to an identity with an 'hf.IntermediateCA'
-attribute whose value equals 'true'.
-The ``fabric-ca-server init`` command also generates a default configuration
-file named **fabric-ca-server-config.yaml** in the server's home directory.
+除非指定了 ``-u <parent-fabric-ca-server-URL>`` 选项，否则 ``fabric-ca-server init`` 命令将生成一个自签名的CA证书。
+如果指定了 ``-u`` ，则服务器的CA证书由父结构CA服务器签名。
 
-If you want the Fabric CA server to use a CA signing certificate and key file which you provide,
-you must place your files in the location referenced by ``ca.certfile`` and ``ca.keyfile`` respectively.
-Both files must be PEM-encoded and must not be encrypted.
-More specifically, the contents of the CA certificate file must begin with ``-----BEGIN CERTIFICATE-----``
-and the contents of the key file must begin with ``-----BEGIN PRIVATE KEY-----`` and not
-``-----BEGIN ENCRYPTED PRIVATE KEY-----``.
+为了向父Fabric CA服务器进行身份验证，URL必须为 ``<scheme>://<enrollmentID>:<secret>@<host>:<port>`` ，
+其中 <enrollmentID> 和 <secret> 对应于“hf.IntermediateCA”属性值为“true”的身份。
 
-Algorithms and key sizes
+``fabric-ca-server init`` 命令还在服务器的主目录中生成名为 **fabric-ca-server-config.yaml** 的默认配置文件。
 
-The CSR can be customized to generate X.509 certificates and keys that
-support Elliptic Curve (ECDSA). The following setting is an
-example of the implementation of Elliptic Curve Digital Signature
-Algorithm (ECDSA) with curve ``prime256v1`` and signature algorithm
-``ecdsa-with-SHA256``:
+如果希望Fabric CA服务器使用您提供的CA签名证书和密钥文件，则必须将文件分别放在``ca.certfile``和 ``ca.keyfile`` 引用的位置。
+两个文件必须是PEM编码的，且不能是已加密的。更具体地说，CA证书文件的内容必须以 ``-----BEGIN CERTIFICATE-----`` 开始，
+而密钥文件的内容必须以 ``-----BEGIN PRIVATE KEY-----`` 开始，而不是 ``-----BEGIN ENCRYPTED PRIVATE KEY-----`` 开始。
+
+算法和密钥尺寸
+~~~~~~~~~~~~~~~~~~~
+
+CSR可以定制生成X.509证书和支持椭圆曲线（ECDSA）的密钥。
+以下设置是椭圆曲线数字签名算法(ECDSA)（用曲线素数 ``prime256v1``）和
+签名算法 ``ecdsa-with-SHA256``的实现的示例：
 
 .. code:: yaml
 
@@ -417,12 +392,12 @@ Algorithm (ECDSA) with curve ``prime256v1`` and signature algorithm
        algo: ecdsa
        size: 256
 
-The choice of algorithm and key size are based on security needs.
+算法和密钥大小的选择是基于安全需求的。
 
-Elliptic Curve (ECDSA) offers the following key size options:
+椭圆曲线（ECDSA）提供以下密钥尺寸选择：
 
 +--------+--------------+-----------------------+
-| size   | ASN1 OID     | Signature Algorithm   |
+| 尺寸    | ASN1 OID     | 签名算法               |
 +========+==============+=======================+
 | 256    | prime256v1   | ecdsa-with-SHA256     |
 +--------+--------------+-----------------------+
@@ -431,64 +406,51 @@ Elliptic Curve (ECDSA) offers the following key size options:
 | 521    | secp521r1    | ecdsa-with-SHA512     |
 +--------+--------------+-----------------------+
 
-Starting the server
+启动服务器
 ~~~~~~~~~~~~~~~~~~~
 
-Start the Fabric CA server as follows:
+按照下面方法启动Fabric CA server：
 
 .. code:: bash
 
     fabric-ca-server start -b <admin>:<adminpw>
 
-If the server has not been previously initialized, it will initialize
-itself as it starts for the first time.  During this initialization, the
-server will generate the ca-cert.pem and ca-key.pem files if they don't
-yet exist and will also create a default configuration file if it does
-not exist.  See the `Initialize the Fabric CA server <#initialize>`__ section.
+如果服务器没有被预先初始化，它将在第一次启动时初始化它自己。
+在此初始化期间，如果还没有ca-cert.pem和ca-key.pem文件，服务器将生成它们，
+如果它们不存在，服务器还将创建默认的配置文件。
+请参见 `Initialize the Fabric CA server <#initialize>`__ 部分。
 
-Unless the Fabric CA server is configured to use LDAP, it must be
-configured with at least one pre-registered bootstrap identity to enable you
-to register and enroll other identities. The ``-b`` option specifies the
-name and password for a bootstrap identity.
+除非Fabric CA服务器被配置为使用LDAP，否则它必须配置有至少一个预先注册的引导身份，
+以使您能够登记（register）和注册（enroll）其他标识。``-b``  选项指定引导身份的名称和密码。
 
-To cause the Fabric CA server to listen on ``https`` rather than
-``http``, set ``tls.enabled`` to ``true``.
+要使Fabric CA服务器侦听 ``https`` 而不是 ``http``，将 ``tls.enabled`` 设定为 ``true``。
 
-SECURITY WARNING: The Fabric CA server should always be started with TLS
-enabled (``tls.enabled`` set to true). Failure to do so leaves the
-server vulnerable to an attacker with access to network traffic.
+.. note:: 安全警告：该结构CA服务器应该总是以启用TLS（ ``tls.enabled`` 设置为true）开始。
+          如果不这样做，服务器就容易受到攻击者访问网络流量的影响。
 
-To limit the number of times that the same secret (or password) can be
-used for enrollment, set the ``registry.maxenrollments`` in the configuration
-file to the appropriate value. If you set the value to 1, the Fabric CA
-server allows passwords to only be used once for a particular enrollment
-ID. If you set the value to -1, the Fabric CA server places no limit on
-the number of times that a secret can be reused for enrollment. The
-default value is -1. Setting the value to 0, the Fabric CA server will
-disable enrollment for all identities and registration of identities will
-not be allowed.
+若要限制同一秘密（或密码）可用于注册（enroll）的次数，请将配置文件中的 ``registry.maxenrollments`` 设置为适当的值。
+如果将值设置为1，则Fabric CA服务器只允许对特定注册ID使用一次密码。
+如果将值设置为-1，则Fabric CA服务器对可重用秘密进行注册的次数没有限制。
+默认值为-1。将值设置为0，Fabric CA服务器将禁用所有标识的登记和注册。
 
-The Fabric CA server should now be listening on port 7054.
+Fabric CA服务器现在应该监听端口7054。
 
-You may skip to the `Fabric CA Client <#fabric-ca-client>`__ section if
-you do not want to configure the Fabric CA server to run in a cluster or
-to use LDAP.
+如果不希望将Fabric CA服务器配置为在集群中运行或使用LDAP，则可以跳到
+`Fabric CA Client <#fabric-ca-client>`__
+部分。
 
-Configuring the database
+配置数据库
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section describes how to configure the Fabric CA server to connect
-to PostgreSQL or MySQL databases. The default database is SQLite and the
-default database file is ``fabric-ca-server.db`` in the Fabric CA
-server's home directory.
+本节介绍如何配置Fabric CA服务器以连接到PostgreSQL或MySQL数据库。
+默认的数据库是SQLite，默认的数据库文件是Fabric Ca服务器的主目录中的``fabric-ca-server.db``。
 
-If you don't care about running the Fabric CA server in a cluster, you
-may skip this section; otherwise, you must configure either PostgreSQL or
-MySQL as described below. Fabric CA supports the following database
-versions in a cluster setup:
+如果不关心在集群中运行Fabric CA服务器，则可以跳过本节；
+否则，必须按照以下描述配置PostgreSQL或MySQL。
+在集群设置中，结构CA支持以下数据库版本：
 
-- PostgreSQL: 9.5.5 or later
-- MySQL: 5.7 or later
+- PostgreSQL: 9.5.5 或者更高版本
+- MySQL: 5.7 或者更高版本
 
 PostgreSQL
 ^^^^^^^^^^
@@ -686,7 +648,7 @@ will reject the connection. To specify client key and certificate files
 for the Fabric CA server, set the ``db.tls.client.certfile``,
 and ``db.tls.client.keyfile`` configuration properties.
 
-Configuring LDAP
+配置LDAP
 ~~~~~~~~~~~~~~~~
 
 The Fabric CA server can be configured to read from an LDAP server.
@@ -879,19 +841,18 @@ haproxy.conf
 
 Note: If using TLS, need to use ``mode tcp``.
 
-Setting up multiple CAs
+启动多CA
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The fabric-ca server by default consists of a single default CA. However, additional CAs
-can be added to a single server by using `cafiles` or `cacount` configuration options.
-Each additional CA will have its own home directory.
+默认情况下，fabric-ca服务器由一个默认的CA组成。
+但是，可以使用 `cafiles` 或 `cacount` 配置选项向单个服务器添加额外的CA。
+每个附加的CA都有自己的主目录。
 
 cacount:
 ^^^^^^^^
+CCANUT。主目录将与服务器目录相对应。使用此选项，目录结构如下：
 
-The `cacount` provides a quick way to start X number of default additional
-CAs. The home directory will be relative to the server directory. With this option,
-the directory structure will be as follows:
+`cacount` 提供了启动X个默认附加CA的快速方法。 主目录将与服务器目录相对应。使用此选项，目录结构如下：
 
 .. code:: yaml
 
@@ -900,10 +861,9 @@ the directory structure will be as follows:
         |--ca1
         |--ca2
 
-Each additional CA will get a default configuration file generated in it's home
-directory, within the configuration file it will contain a unique CA name.
+每个附加的CA将获得在其主目录中生成的默认配置文件，在配置文件中它将包含唯一的CA名称。
 
-For example, the following command will start 2 default CA instances:
+例如，下面的命令将启动2个缺省CA实例：
 
 .. code:: bash
 
@@ -912,24 +872,20 @@ For example, the following command will start 2 default CA instances:
 cafiles:
 ^^^^^^^^
 
-If absolute paths are not provided when using the cafiles configuration option,
-the CA home directory will be relative to the server directory.
+如果使用cafiles配置选项时没有提供绝对路径，则CA主目录将相对于服务器目录。
 
-To use this option, CA configuration files must have already been generated and
-configured for each CA that is to be started. Each configuration file must have
-a unique CA name and Common Name (CN), otherwise the server will fail to start as these
-names must be unique. The CA configuration files will override any default
-CA configuration, and any missing options in the CA configuration files will be
-replaced by the values from the default CA.
+若要使用此选项，必须为每个要启动的CA生成和配置CA配置文件。
+每个配置文件必须具有唯一的CA名称和公共名称（CN），否则服务器将无法启动，因为这些名称必须是唯一的。
+CA配置文件将覆盖任何默认的CA配置，并且CA配置文件中的任何缺失选项都将由默认CA的值替换。
 
-The precedence order will be as follows:
+优先顺序如下：
 
-  1. CA Configuration file
-  2. Default CA CLI flags
-  3. Default CA Environment variables
-  4. Default CA Configuration file
+  1. CA配置文件
+  2. 默认CA CLI标志
+  3. 默认CA环境变量
+  4. 默认CA配置文件
 
-A CA configuration file must contain at least the following:
+CA配置文件必须至少包含以下内容：
 
 .. code:: yaml
 
@@ -940,7 +896,7 @@ A CA configuration file must contain at least the following:
     csr:
       cn: <COMMONNAME>
 
-You may configure your directory structure as follows:
+您可以将目录结构配置如下：
 
 .. code:: yaml
 
@@ -951,7 +907,7 @@ You may configure your directory structure as follows:
         |--ca2
           |-- fabric-ca-config.yaml
 
-For example, the following command will start two customized CA instances:
+例如，下面的命令将启动两个定制的CA实例：
 
 .. code:: bash
 
@@ -959,41 +915,40 @@ For example, the following command will start two customized CA instances:
     --cafiles ca/ca2/fabric-ca-config.yaml
 
 
-Enrolling an intermediate CA
+注册中间CA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to create a CA signing certificate for an intermediate CA, the intermediate
-CA must enroll with a parent CA in the same way that a fabric-ca-client enrolls with a CA.
-This is done by using the -u option to specify the URL of the parent CA and the enrollment ID
-and secret as shown below.  The identity associated with this enrollment ID must have an
-attribute with a name of "hf.IntermediateCA" and a value of "true".  The CN (or Common Name)
-of the issued certificate will be set to the enrollment ID. An error will occur if an intermediate
-CA tries to explicitly specify a CN value.
+为了给中间CA创建CA签名证书，中间CA必须以fabric-ca-client向CA注册相同的方式，向父CA注册。
+这是通过使用 -u 选项指定父CA的URL以及注册ID和密码来完成的，正如下所示。
+与此注册ID相关联的标识必须具有名为“hf.IntermediateCA”的属性和“true”的值。
+颁发证书的CN（或公共名称）将被设置为注册ID（enrollment ID）。
+如果中间CA试图显式指定CN值，则将发生错误。
 
 .. code:: bash
 
     fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
 
-For other intermediate CA flags see `Fabric CA server's configuration file format`_ section.
+对于其他中间CA标志，请参见 `Fabric CA server's configuration file format`_ 部分。
 
-
-Upgrading the server
+升级服务器
 ~~~~~~~~~~~~~~~~~~~~
 
-The Fabric CA server must be upgraded before upgrading the Fabric CA client.
-Prior to upgrade, it is suggested that the current database be backed up:
+在Fabric CA客户端之前，必须对Fabric CA服务器进行升级。
+在升级之前，建议备份当前数据库：
 
-- If using sqlite3, backup the current database file (which is named fabric-ca-server.db by default).
-- For other database types, use the appropriate backup/replication mechanism.
+- 如果使用sqlite3，则备份当前数据库文件（默认为命名为fabric-ca-server.db）。
+- 对于其他数据库类型，使用适当的备份/复制机制。
 
-To upgrade a single instance of Fabric CA server:
+升级织物CA服务器的单个实例：
 
-1. Stop the fabric-ca-server process.
-2. Ensure the current database is backed up.
-3. Replace previous fabric-ca-server binary with the upgraded version.
-4. Launch the fabric-ca-server process.
-5. Verify the fabric-ca-server process is available with the following
-   command where <host> is the hostname on which the server was started::
+启动织物CA服务器进程。通过以下命令验证.-ca-server进程可用，其中<host>是启动服务器的主机名：
+
+
+1. 停止Fabric CA服务器进程。
+2. 确保备份当前数据库。
+3. 用升级版本替换以前的fabric-ca-server二进制文件。
+4. 启动fabric-ca-server进程。
+5. 通过以下命令验证fabric-ca-server进程是否可用，其中<host>是启动服务器的主机名::
 
       fabric-ca-client getcainfo -u http://<host>:7054
 
@@ -1093,30 +1048,30 @@ To display summary information from the haproxy "show stat" command, the followi
 
 .. _client:
 
-Fabric CA Client
+Fabric CA 客户端
 ----------------
+
+本节介绍如何使用fabric-ca-client命令。
+
+Fabric CA客户端的主目录确定如下：
+
 
 This section describes how to use the fabric-ca-client command.
 
 The Fabric CA client's home directory is determined as follows:
-  - if the --home command line option is set, use its value
-  - otherwise, if the ``FABRIC_CA_CLIENT_HOME`` environment variable is set, use
-    its value
-  - otherwise, if the ``FABRIC_CA_HOME`` environment variable is set,
-    use its value
-  - otherwise, if the ``CA_CFG_PATH`` environment variable is set, use
-    its value
-  - otherwise, use ``$HOME/.fabric-ca-client``
+  - 如果设置了 --home 命令行选项，则使用它的值
+  - 否则，如果设置了 ``FABRIC_CA_CLIENT_HOME`` 环境变量，则使用其值
+  - 否则，如果设置了 ``FABRIC_CA_HOME`` 环境变量，则使用其值。
+  - 否则，如果设置了 ``CA_CFG_PATH`` 环境变量，则使用其值。
+  - 否则，使用 ``$HOME/.fabric-ca-client``
 
-The instructions below assume that the client configuration file exists
-in the client's home directory.
+下面的说明，假定客户端配置文件存在于客户端的主目录中。
 
-Enrolling the bootstrap identity
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+注册启动身份
+~~~~~~
 
-First, if needed, customize the CSR (Certificate Signing Request) section
-in the client configuration file. Note that ``csr.cn`` field must be set
-to the ID of the bootstrap identity. Default CSR values are shown below:
+首先，如果需要，在客户端配置文件中自定义CSR（证书签名请求）部分。
+注意，必须将 ``csr.cn`` 字段设置为引导标识的ID。默认CSR值如下所示：
 
 .. code:: yaml
 
@@ -1138,30 +1093,27 @@ to the ID of the bootstrap identity. Default CSR values are shown below:
         pathlenzero:
         expiry:
 
-See `CSR fields <#csr-fields>`__ for description of the fields.
+CSR字段来描述字段。
 
-Then run ``fabric-ca-client enroll`` command to enroll the identity. For example,
-following command enrolls an identity whose ID is **admin** and password is **adminpw**
-by calling Fabric CA server that is running locally at 7054 port.
+参见 `CSR fields <#csr-fields>`__ 来查看这些字段的描述。
+
+然后运行 ``fabric-ca-client enroll`` 命令来注册身份。
+例如，以下命令通过调用本地在7054端口运行的Fabric CA服务器来注册ID为 **admin** 和密码为 **adminpw** 的身份。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client enroll -u http://admin:adminpw@localhost:7054
 
-The enroll command stores an enrollment certificate (ECert), corresponding private key and CA
-certificate chain PEM files in the subdirectories of the Fabric CA client's ``msp`` directory.
-You will see messages indicating where the PEM files are stored.
+注册命令在Fabric CA客户端的 ``msp`` 目录的子目录中存储注册证书（ECert）、相应的私钥和CA证书链PEM文件。
+您将看到指示存储PEM文件的位置的消息。
 
-Registering a new identity
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+登记一个新的身份
+~~~~~~~~
 
-The identity performing the register request must be currently enrolled, and
-must also have the proper authority to register the type of the identity that is being
-registered.
+执行注册请求的身份必须当场（currently）注册，并且还必须具有注册正在注册的身份类型的适当权限。
 
-In particular, three authorization checks are made by the Fabric CA server
-during registration as follows:
+特别地，在注册期间，由Fabric CA服务器进行的三个授权检查如下：
 
 1. The registrar (i.e. the invoker) must have the "hf.Registrar.Roles" attribute with a
    comma-separated list of values where one of the values equals the type of
@@ -1238,11 +1190,10 @@ Examples:
          value is 'true', it is invalid because the hf.Revoker attribute is a boolean attribute
          and the registrar's value for the attribute is not 'true'.
 
-The table below lists all the attributes that can be registered for an identity.
-The names of attributes are case sensitive.
+下表列出了可以为身份注册的所有属性。属性的名称是区分大小写的。
 
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
-| Name                        | Type       | Description                                                                                                |
+| 名称                         | 类型        | 描述                                                                                                |
 +=============================+============+============================================================================================================+
 | hf.Registrar.Roles          | List       | List of roles that the registrar is allowed to manage                                                      |
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
@@ -1426,44 +1377,37 @@ certificate in the chain is followed by its issuer's CA certificate. If you need
 to return the CA chain in the opposite order, then set the environment variable ``CA_CHAIN_PARENT_FIRST``
 to ``true`` and restart the Fabric CA server. The Fabric CA client will handle either order appropriately.
 
-Reenrolling an Identity
+重新注册身份
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Suppose your enrollment certificate is about to expire or has been compromised.
-You can issue the reenroll command to renew your enrollment certificate as follows.
+假设你的入学证书即将到期。您可以发布 reenroll 命令来更新您的注册证书，就像下面这样操作：
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client reenroll
 
-Revoking a certificate or identity
+吊销证书或身份
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-An identity or a certificate can be revoked. Revoking an identity will revoke all
-the certificates owned by the identity and will also prevent the identity from getting
-any new certificates. Revoking a certificate will invalidate a single certificate.
 
-In order to revoke a certificate or an identity, the calling identity must have
-the ``hf.Revoker`` and ``hf.Registrar.Roles`` attribute. The revoking identity
-can only revoke a certificate or an identity that has an affiliation that is
-equal to or prefixed by the revoking identity's affiliation. Furthermore, the
-revoker can only revoke identities with types that are listed in the revoker's
-``hf.Registrar.Roles`` attribute.
+可以取消身份或证书。撤销身份将撤销该身份所拥有的所有证书，并且还将阻止该身份获得任何新证书。
 
-For example, a revoker with affiliation **orgs.org1** and 'hf.Registrar.Roles=peer,client'
-attribute can revoke either a **peer** or **client** type identity affiliated with
-**orgs.org1** or **orgs.org1.department1** but can't revoke an identity affiliated with
-**orgs.org2** or of any other type.
+吊销证书将使单个证书无效。为了撤销证书或身份，调用身份必须具有 ``hf.Revoker` 和 ``hf.Registrar.Roles`` 属性。
+撤消身份只能撤消具有与撤消身份所属关系相等或前缀的附属关系的证书或身份。
+此外，撤消者只能撤销在撤消者的 ``hf.Registrar.Roles`` 角色属性中列出的类型的身份。
 
-The following command disables an identity and revokes all of the certificates
-associated with the identity. All future requests received by the Fabric CA server
-from this identity will be rejected.
+例如，具有关联 **orgs.org1** 和 'hf.Registrar.Roles=peer,client' 属性的撤销器，
+可以撤销与　**orgs.org1**  或 **orgs.org1.department1** 相关联的 **peer** 或 **client** 类型身份，
+但不能撤销与 **orgs.org2**  或任何其他类型相关联的标识。下
+
+面的命令禁用身份并撤销与该身份相关联的所有证书。
+所有Fabric CA服务器接收到的来自该身份的请求都将被拒绝。
 
 .. code:: bash
 
     fabric-ca-client revoke -e <enrollment_id> -r <reason>
 
-The following are the supported reasons that can be specified using ``-r`` flag:
+以下是可以使用 ``-r`` 标志指定的支持的原因：
 
   1. unspecified
   2. keycompromise
@@ -1476,23 +1420,22 @@ The following are the supported reasons that can be specified using ``-r`` flag:
   9. privilegewithdrawn
   10. aacompromise
 
-For example, the bootstrap admin who is associated with root of the affiliation tree
-can revoke **peer1**'s identity as follows:
+例如，与关联树的根关联的bootstrap admin，可以按照如下方式撤销 **peer1** 的身份：
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client revoke -e peer1
 
-An enrollment certificate that belongs to an identity can be revoked by
-specifying its AKI (Authority Key Identifier) and serial number as follows:
+通过指定其AKI（Authority Key Identifier：授权密钥标识符）和序列号，
+可以撤销属于某身份的注册证书（enrollment certificate）：
 
 .. code:: bash
 
     fabric-ca-client revoke -a xxx -s yyy -r <reason>
 
-For example, you can get the AKI and the serial number of a certificate using the openssl command
-and pass them to the ``revoke`` command to revoke the said certificate as follows:
+例如，可以使用openssl命令获得证书的AKI和序列号，并将其传递给 ``revoke`` 命令，
+以便按以下方式撤销所述证书：
 
 .. code:: bash
 
@@ -1500,69 +1443,62 @@ and pass them to the ``revoke`` command to revoke the said certificate as follow
    aki=$(openssl x509 -in userecert.pem -text | awk '/keyid/ {gsub(/ *keyid:|:/,"",$1);print tolower($0)}')
    fabric-ca-client revoke -s $serial -a $aki -r affiliationchange
 
-The `--gencrl` flag can be used to generate a CRL (Certificate Revocation List) that contains all the revoked
-certificates. For example, following command will revoke the identity **peer1**, generates a CRL and stores
-it in the **<msp folder>/crls/crl.pem** file.
+`--gencrl` 标志可用于生成包含所有撤销证书的CRL（证书吊销列表）。
+例如，下面的命令将撤销标识对等点1，生成一个CRL并将其存储在 **<msp 文件夹>/crls/crl.pem** 文件中。
 
 .. code:: bash
 
     fabric-ca-client revoke -e peer1 --gencrl
 
-A CRL can also be generated using the `gencrl` command. Refer to the `Generating a CRL (Certificate Revocation List)`_
-section for more information on the `gencrl` command.
+还可以使用 `gencrl` 命令生成CRL。有关 `gencrl` 命令的更多信息，请参阅
+`Generating a CRL (Certificate Revocation List)`_
+部分。
 
-Generating a CRL (Certificate Revocation List)
+生成CRL(证书吊销列表：Certificate Revocation List)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After a certificate is revoked in the Fabric CA server, the appropriate MSPs in Hyperledger Fabric must also be updated.
-This includes both local MSPs of the peers as well as MSPs in the appropriate channel configuration blocks.
-To do this, PEM encoded CRL (certificate revocation list) file must be placed in the `crls`
-folder of the MSP. The ``fabric-ca-client gencrl`` command can be used to generate a CRL. Any identity
-with ``hf.GenCRL`` attribute can create a CRL that contains serial numbers of all certificates that were revoked
-during a certain period. The created CRL is stored in the `<msp folder>/crls/crl.pem` file.
+在Fabric CA服务器中撤销证书之后，还必须更新Hyperledger Fabric中的对应MSP。
+这既包括peer的本地MSP，也包括适当通道配置块中的MSP。
+为此，必须将PEM编码的CRL（证书吊销列表）文件放置在MSP的 `crls` 文件夹中。
+可以使用Fabric CA客户端 ``fabric-ca-client gencrl`` 命令生成CRL。
+任何具有 ``hf.GenCRL`` 属性的身份都可以创建一个CRL，该CRL包含某个时期内撤销的所有证书的序列号。
+创建的CRL存储在 `<msp 文件夹>/crls/crl.pem` 文件中。
 
-The following command will create a CRL containing all the revoked certficates (expired and unexpired) and
-store the CRL in the `~/msp/crls/crl.pem` file.
+下面的命令将创建一个包含所有撤销的证书（过期和未到期）的CRL，并将CRL存储在 `~/msp/crls/crl.pem` 文件中。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
     fabric-ca-client gencrl -M ~/msp
 
-The next command will create a CRL containing all certificates (expired and unexpired) that were revoked after
-2017-09-13T16:39:57-08:00 (specified by the `--revokedafter` flag) and before 2017-09-21T16:39:57-08:00
-(specified by the `--revokedbefore` flag) and store the CRL in the `~/msp/crls/crl.pem` file.
+下一个命令将创建包含所有特定证书（过期和未过期）的CRL，这些证书在2017～0913T16:39：55-0800（由 `--revokedafter` 标志指定）之后，
+在2017～0921T16:39：55-0800（由 `--revokedbefore` 指定）之前。CRL存储在 `~/msp/crls/crl.pem` 文件中。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
     fabric-ca-client gencrl --caname "" --revokedafter 2017-09-13T16:39:57-08:00 --revokedbefore 2017-09-21T16:39:57-08:00 -M ~/msp
 
+`--caname` 标识指明了命令被发送往的CA的名称。在这个例子里，gencrl请求被发送到默认的CA。
 
-The `--caname` flag specifies the name of the CA to which this request is sent. In this example, the gencrl request is
-sent to the default CA.
+`--revokedafter` 和 `--revokedbefore` 标识指明了一个时间段的上限和下限。
+生成的CRL将会包含这段时间内吊销的证书。
+值必须是以RFC3339格式表示的UTC时间戳。 `--revokedafter` 不能比 `--revokedbefore` 时间戳大.
 
-The `--revokedafter` and `--revokedbefore` flags specify the lower and upper boundaries of a time period.
-The generated CRL will contain certificates that were revoked in this time period. The values must be UTC
-timestamps specified in RFC3339 format. The `--revokedafter` timestamp cannot be greater than the
-`--revokedbefore` timestamp.
+默认, 'Next Update' CRL日期被设定为下一天。 `crl.expiry` CA 配置属性可以同来指定一个自定义值。
 
-By default, 'Next Update' date of the CRL is set to next day. The `crl.expiry` CA configuration property
-can be used to specify a custom value.
-
-The gencrl command will also accept `--expireafter` and `--expirebefore` flags that can be used to generate a CRL
-with revoked certificates that expire during the period specified by these flags. For example, the following command
-will generate a CRL that contains certificates that were revoked after 2017-09-13T16:39:57-08:00 and
-before 2017-09-21T16:39:57-08:00, and that expire after 2017-09-13T16:39:57-08:00 and before 2018-09-13T16:39:57-08:00
+gencrl命令还将接受 `--expireafter` 和 `--expirebefore` 标记，
+这些标记可用于生成具有特定撤销证书的CRL，这些证书在这些标记指定的期间过期。
+例如，以下命令将生成一个CRL，该CRL包含在 2017-09-13T16:39:57-08:00 之后和 2017-09-21T16:39:57-08:00 之前被撤销，
+并在 2017-09-13T16:39:57-08:00 之后和 2018-09-13T16:39:57-08:00 之前过期的证书。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=~/clientconfig
     fabric-ca-client gencrl --caname "" --expireafter 2017-09-13T16:39:57-08:00 --expirebefore 2018-09-13T16:39:57-08:00  --revokedafter 2017-09-13T16:39:57-08:00 --revokedbefore 2017-09-21T16:39:57-08:00 -M ~/msp
 
-The `fabric-samples/fabric-ca <https://github.com/hyperledger/fabric-samples/blob/master/fabric-ca/scripts/run-fabric.sh>`_
-sample demonstrates how to generate a CRL that contains certificate of a revoked user and update the channel
-msp. It will then demonstrate that querying the channel using the revoked user credentials will result
-in an authorization error.
+`fabric-samples/fabric-ca <https://github.com/hyperledger/fabric-samples/blob/master/fabric-ca/scripts/run-fabric.sh>`_
+示例演示如何生成包含被撤销的用户所拥有证书的CRL并更新通道msp。
+然后，将证明使用撤销的用户凭据来查询通道，将导致授权错误。
 
 Enabling TLS
 ~~~~~~~~~~~~
