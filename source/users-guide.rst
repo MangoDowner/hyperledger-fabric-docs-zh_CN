@@ -15,7 +15,7 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
 `Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__
 获取更多信息。
 
-.. _Back to Top:
+.. _回到顶端:
 
 Table of Contents
 -----------------
@@ -252,7 +252,7 @@ The following links shows the :doc:`Server Command Line <servercli>` and
           ``--csr.hosts host1 --csr.hosts host2``. When using the former format,
           please make sure there are no space before or after any commas.
 
-`Back to Top`_
+`回到顶端`_
 
 Configuration Settings
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -323,7 +323,7 @@ directory, ``cert.pem`` file in the ``~/config/certs`` directory and the
         certfile: certs/cert.pem
         keyfile: /abs/path/key.pem
 
-`Back to Top`_
+`回到顶端`_
 
 
 
@@ -1108,7 +1108,7 @@ To display summary information from the haproxy "show stat" command, the followi
         2   fabric-cas  server4   UP       1    1    0
 
 
-`Back to Top`_
+`回到顶端`_
 
 
 
@@ -2129,20 +2129,18 @@ issuing the following command.
  export FABRIC_CA_CLIENT_HOME=/tmp/clientHome
  fabric-ca-client certificate list --id admin --store msp/admincerts
 
-Contact specific CA instance
+接触特定CA实例
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a server is running multiple CA instances, requests can be directed to a
-specific CA. By default, if no CA name is specified in the client request the
-request will be directed to the default CA on the fabric-ca server. A CA name
-can be specified on the command line of a client command using the ``caname``
-filter as follows:
+当服务器运行多个CA实例时，请求可以指向特定的CA。
+默认情况下，如果在客户端请求中没有指定CA名称，则请求将被指向fabric-ca服务器上的默认CA。
+可以像下面这样使用 ``caname`` 筛选器在客户端命令的命令行上指定CA名称：
 
 .. code:: bash
 
     fabric-ca-client enroll -u http://admin:adminpw@localhost:7054 --caname <caname>
 
-`Back to Top`_
+`回到顶端`_
 
 HSM
 ---
@@ -2189,7 +2187,7 @@ FABRIC_CA_SERVER_BCCSP_PKCS11_LIBRARY=/usr/local/Cellar/softhsm/2.1.0/lib/sofths
 FABRIC_CA_SERVER_BCCSP_PKCS11_PIN=98765432
 FABRIC_CA_SERVER_BCCSP_PKCS11_LABEL=ForFabric
 
-`Back to Top`_
+`回到顶端`_
 
 File Formats
 ------------
@@ -2208,7 +2206,7 @@ A default configuration file is created in the client's home directory
 (see `Fabric CA Client <#client>`__ section for more info). The following
 link shows a sample :doc:`Client configuration file <clientconfig>`.
 
-`Back to Top`_
+`回到顶端`_
 
 Troubleshooting
 ---------------
