@@ -95,7 +95,8 @@ Python
 ^^^^^^
 
 .. note:: 下面的内容只对Ubuntu 16.04用户有效。
-          译者注：MacOS默认安装了Python 2.7。
+
+  译者注：MacOS默认安装了Python 2.7。
 
 默认情况下，Ubuntu 16.04会安装好Python 3.5.1版本来作为 ``python3`` 的可执行文件。
 Fabric Node.js SDK需要Python 2.7以执行 ``npm install`` 操作，从而成功安装。
@@ -163,7 +164,8 @@ Git和 Docer Toolbox中的 ``curl`` 命令已经陈旧了，而且不能够正�
 现在，你的环境应该能够走通 :doc:`getting_started` 中的例子和教程了。
 
 .. note:: 如果你还有本文未能提到的问题，或者遇到了任何教程中的问题，请访问 :doc:`questions`
-          页面来获取如何找到更多帮助的方法。
+页面来获取如何找到更多帮助的方法。
+
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/

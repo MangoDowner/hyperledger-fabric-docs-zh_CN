@@ -1,184 +1,130 @@
-Architecture Explained
+架构解释
 ======================
 
-The Hyperledger Fabric architecture delivers the following advantages:
+Hyperledger Fabric架构具有以下优势：
 
--  **Chaincode trust flexibility.** The architecture separates *trust
-   assumptions* for chaincodes (blockchain applications) from trust
-   assumptions for ordering. In other words, the ordering service may be
-   provided by one set of nodes (orderers) and tolerate some of them to
-   fail or misbehave, and the endorsers may be different for each
-   chaincode.
+-  **Chaincode信任灵活性。** 该体系结构将链码（区块链应用程序）的信任假设（trust
+   assumptions）与用于排序的信任假设分开。
+   换句话说，排序服务可以由一组节点（排序节点）提供并且容忍它们中的一些失败或行为不当，
+   并且对于每个链码，背书人可以是不同的。
 
--  **Scalability.** As the endorser nodes responsible for particular
-   chaincode are orthogonal to the orderers, the system may *scale*
-   better than if these functions were done by the same nodes. In
-   particular, this results when different chaincodes specify disjoint
-   endorsers, which introduces a partitioning of chaincodes between
-   endorsers and allows parallel chaincode execution (endorsement).
-   Besides, chaincode execution, which can potentially be costly, is
-   removed from the critical path of the ordering service.
+-  **可扩展性。** 由于负责特定链码的背书节点与排序节点正交，因此相比于这些功能由相同节点完成的情况，系统可能更好地扩展。
+   特别是，当不同的链码指定不相交的背书人时，会产生这种情况，这会在背书人之间引入链码的分区，并允许并行链码执行（背书）。
+   此外，哪些成功高昂的链码执行，被从排序服务的关键路径中移除。
 
--  **Confidentiality.** The architecture facilitates deployment of
-   chaincodes that have *confidentiality* requirements with respect to
-   the content and state updates of its transactions.
+-  **保密。** 该体系结构有助于部署对其事务的内容和状态更新具有 **机密性** 要求的代码。
 
--  **Consensus modularity.** The architecture is *modular* and allows
-   pluggable consensus (i.e., ordering service) implementations.
+-  **共识模块化。** 该架构是**模块化**的，并且允许插件化的共识（即，排序服务）实现。
 
-**Part I: Elements of the architecture relevant to Hyperledger Fabric
-v1**
+**第一部分：与Hyperledger Fabric v1相关的架构元素**
 
-1. System architecture
-2. Basic workflow of transaction endorsement
-3. Endorsement policies
++ 1. 系统架构
++ 2. 交易背书的基本工作流程
++ 3. 背书政策
 
-   **Part II: Post-v1 elements of the architecture**
+**第二部分：体系结构的Post-v1元素**
 
-4. Ledger checkpointing (pruning)
++ 4. 分类帐检查点（修剪）
 
-1. System architecture
+1. 系统架构
 ----------------------
 
-The blockchain is a distributed system consisting of many nodes that
-communicate with each other. The blockchain runs programs called
-chaincode, holds state and ledger data, and executes transactions. The
-chaincode is the central element as transactions are operations invoked
-on the chaincode. Transactions have to be "endorsed" and only endorsed
-transactions may be committed and have an effect on the state. There may
-exist one or more special chaincodes for management functions and
-parameters, collectively called *system chaincodes*.
+区块链是一个分布式系统，由许多相互通信的节点组成。
+区块链运行称为链码的程序，保存状态和分类帐数据，并执行事务。
+链码是核心元素，因为事务是在链代码上调用的操作。
+交易必须“得到背书”，并且只有经过背书的交易才可能会被提交并对状态产生影响。
+可能会存在这样的特殊链码，其用于管理功能和参数，统称为 *系统链码* 。
 
-1.1. Transactions
+1.1. 交易
 ~~~~~~~~~~~~~~~~~
 
-Transactions may be of two types:
+交易可以有两种类型：
 
--  *Deploy transactions* create new chaincode and take a program as
-   parameter. When a deploy transaction executes successfully, the
-   chaincode has been installed "on" the blockchain.
+-  *部署交易（Deploy transactions）*创建新的链码并将程序作为参数。成功执行部署交易时，链码就已安装在区块链“上”了。
 
--  *Invoke transactions* perform an operation in the context of
-   previously deployed chaincode. An invoke transaction refers to a
-   chaincode and to one of its provided functions. When successful, the
-   chaincode executes the specified function - which may involve
-   modifying the corresponding state, and returning an output.
+-  *调用交易（Invoke transactions）*在先前部署的链码的上下文中执行操作。调用交易是指链码及其提供的函数之一。
+   成功时，链码执行指定的函数 - 可能涉及修改相应的状态，并返回输出。
 
-As described later, deploy transactions are special cases of invoke
-transactions, where a deploy transaction that creates new chaincode,
-corresponds to an invoke transaction on a system chaincode.
+如稍后所述，部署交易是调用交易的特殊情况，其中创建新链码的部署交易对应于系统链码上的调用交易。
 
-**Remark:** *This document currently assumes that a transaction either
-creates new chaincode or invokes an operation provided by *one* already
-deployed chaincode. This document does not yet describe: a)
-optimizations for query (read-only) transactions (included in v1), b)
-support for cross-chaincode transactions (post-v1 feature).*
 
-1.2. Blockchain datastructures
+
+**备注：** *本文档目前假定交易要么创建新的链代码，要么调用已经部署的链码所提供的操作。*
+本文档尚未描述：a）查询（只读）交易的优化（包含在v1中），
+b）支持交叉链码（cross-chaincode）交易（post-v1功能）。
+
+1.2. 区块链数据结构
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1.2.1. State
+1.2.1. 状态
 ^^^^^^^^^^^^
 
-The latest state of the blockchain (or, simply, *state*) is modeled as a
-versioned key-value store (KVS), where keys are names and values are
-arbitrary blobs. These entries are manipulated by the chaincodes
-(applications) running on the blockchain through ``put`` and ``get``
-KVS-operations. The state is stored persistently and updates to the
-state are logged. Notice that versioned KVS is adopted as state model,
-an implementation may use actual KVSs, but also RDBMSs or any other
-solution.
+区块链的最新状态（或简称为*状态*）被建模为版本化键值存储（versioned key-value store，KVS），其中键是名称，值是任意blob。
+这些条目由区块链上所运行的链码（应用程序），通过``put``和``get`` KVS-操作 来操纵。
+状态被持久存储，而且状态的更新也被日志记录
+请注意，版本化的KVS作为状态模型，其实现可以使用实际的KVS，但也可以使用RDBMS或任何其他解决方案。
 
-More formally, state ``s`` is modeled as an element of a mapping
-``K -> (V X N)``, where:
+更正式地说，状态 ``s`` 被建模为映射 ``K -> (V X N)`` 的元素，其中：
 
--  ``K`` is a set of keys
--  ``V`` is a set of values
--  ``N`` is an infinite ordered set of version numbers. Injective
-   function ``next: N -> N`` takes an element of ``N`` and returns the
-   next version number.
+内射函数next：N  - > N取N的元素并返回下一个版本号。
 
-Both ``V`` and ``N`` contain a special element |falsum| (empty type), which is
-in case of ``N`` the lowest element. Initially all keys are mapped to
-(|falsum|, |falsum|). For ``s(k)=(v,ver)`` we denote ``v`` by ``s(k).value``,
-and ``ver`` by ``s(k).version``.
+-  ``K`` 是一组键
+-  ``V`` 是一组值
+-  ``N`` 是无限有序的版本号集。 内射函数 ``next: N -> N`` 取 ``N`` 的元素并返回下一个版本号。
+
+``V`` 和 ``N`` 都包含一个特殊元素 |falsum|（空类型），在 ``N`` 的情况下是最低元素。
+最初所有键都映射到(|falsum|, |falsum|)。
+对于 ``s(k)=(v,ver)`` ，我们用 ``s(k).value`` 表示 ``v`` ，用``s(k).version``表示 ``ver``。
 
 .. |falsum| unicode:: U+22A5
 .. |in| unicode:: U+2208
 
-KVS operations are modeled as follows:
+KVS操作建模如下：
 
--  ``put(k,v)`` for ``k`` |in| ``K`` and ``v`` |in| ``V``, takes the blockchain
-   state ``s`` and changes it to ``s'`` such that
-   ``s'(k)=(v,next(s(k).version))`` with ``s'(k')=s(k')`` for all
-   ``k'!=k``.
--  ``get(k)`` returns ``s(k)``.
+-  对于 ``k`` |in| ``K`` 和 ``v`` |in| ``V``, ``put(k,v)`` 采用区块链状态 ``s`` 并将其改为 ``s'``，使得
+   ``s'(k)=(v,next(s(k).version))`` 对于所有 ``k'!=k`` 具有 ``s'(k')=s(k')``。
 
-State is maintained by peers, but not by orderers and clients.
+-  ``get(k)`` 返回 ``s(k)``。
 
-**State partitioning.** Keys in the KVS can be recognized from their
-name to belong to a particular chaincode, in the sense that only
-transaction of a certain chaincode may modify the keys belonging to this
-chaincode. In principle, any chaincode can read the keys belonging to
-other chaincodes. *Support for cross-chaincode transactions, that modify
-the state belonging to two or more chaincodes is a post-v1 feature.*
+State由peer维护，但不是由排序节点和client维护。
 
-1.2.2 Ledger
+**状态分区。** KVS中的键可以从其名称中识别为属于特定的链码，在某种意义上，只有某个链码的交易才可以修改属于该链码的键。
+原则上，任何链码都可以读取属于其他链码的键。*支持跨链码交易，修改属于两个或多个链码的状态是post-v1的功能。*
+
+1.2.2 账本
 ^^^^^^^^^^^^
 
-Ledger provides a verifiable history of all successful state changes (we
-talk about *valid* transactions) and unsuccessful attempts to change
-state (we talk about *invalid* transactions), occurring during the
-operation of the system.
+分类账提供了在系统操作期间发生的可验证历史，其包含了所有"成功状态更改"（我们讨论*有效*事务）和"未成功尝试状态更改"（我们讨论*无效*事务）。
 
-Ledger is constructed by the ordering service (see Sec 1.3.3) as a
-totally ordered hashchain of *blocks* of (valid or invalid)
-transactions. The hashchain imposes the total order of blocks in a
-ledger and each block contains an array of totally ordered transactions.
-This imposes total order across all transactions.
+分类账由排序服务（参见Sec 1.3.3）构造为完全有序的哈希链，其包含了（有效或无效）交易*块*。
+哈希链将总体顺序强加在一个账本中，每个区块包含一个全排序交易的数组。
+这对所有交易都施加了总体顺序。
 
-Ledger is kept at all peers and, optionally, at a subset of orderers. In
-the context of an orderer we refer to the Ledger as to
-``OrdererLedger``, whereas in the context of a peer we refer to the
-ledger as to ``PeerLedger``. ``PeerLedger`` differs from the
-``OrdererLedger`` in that peers locally maintain a bitmask that tells
-apart valid transactions from invalid ones (see Section XX for more
-details).
+分类帐保留在所有的peer上，或者放在排序节点的子集中。
+在排序节点的上下文中，我们将账本称为 ``OrdererLedger``，
+而在对等者的上下文中，我们将分类账称为 ``PeerLedger``。
+``PeerLedger`` 与 ``OrdererLedger`` 的不同之处在于，
+对等点在本地维护一个位掩码（bitmask），用于区分有效事务和无效事务（有关详细信息，请参阅XX节）。
 
-Peers may prune ``PeerLedger`` as described in Section XX (post-v1
-feature). Orderers maintain ``OrdererLedger`` for fault-tolerance and
-availability (of the ``PeerLedger``) and may decide to prune it at
-anytime, provided that properties of the ordering service (see Sec.
-1.3.3) are maintained.
+peer可以修剪（prune） ``PeerLedger``，如节XX所描述的（post-V1特征）。
+排序节点维护 ``OrdererLedger`` 以获得容错性和可用性（``PeerLedger``），并且可以决定在任何时候对其进行修剪，
+前提是排序服务的属性（参见Sec.1.3.3）保持不变。
 
-The ledger allows peers to replay the history of all transactions and to
-reconstruct the state. Therefore, state as described in Sec 1.2.1 is an
-optional datastructure.
+账本允许peer重放所有事务的历史并重建状态。因此，SEC1.2.1中描述的状态是可选的数据结构。
 
-1.3. Nodes
+1.3. 节点
 ~~~~~~~~~~
 
-Nodes are the communication entities of the blockchain. A "node" is only
-a logical function in the sense that multiple nodes of different types
-can run on the same physical server. What counts is how nodes are
-grouped in "trust domains" and associated to logical entities that
-control them.
+节点是区块链的通信实体。一个“节点”只是一个逻辑函数，在这个意义上，不同类型的多个节点可以在同一个物理服务器上运行。
+重要的是如何将节点分组在“信任域”中，并将其与控制它们的逻辑实体相关联。
 
-There are three types of nodes:
+有三种类型的节点：
 
-1. **Client** or **submitting-client**: a client that submits an actual
-   transaction-invocation to the endorsers, and broadcasts
-   transaction-proposals to the ordering service.
++ 1. **客户端** 或 **提交客户端**：向背书节点提交实际的交易调用，并向排序服务广播交易提案的客户端。
++ 2. **对等体：** 一个节点，它提交交易并维护状态和一个分类帐的副本（见SEC，1.2）。此外，对等体可以具有特殊的 **背书节点** 角色。
++ 3. **排序服务节点** 或 **订购节点**：运行通信服务的节点，该通信服务实现传递保证，如原子性或总排序广播（total order broadcast）。
 
-2. **Peer**: a node that commits transactions and maintains the state
-   and a copy of the ledger (see Sec, 1.2). Besides, peers can have a
-   special **endorser** role.
-
-3. **Ordering-service-node** or **orderer**: a node running the
-   communication service that implements a delivery guarantee, such as
-   atomic or total order broadcast.
-
-The types of nodes are explained next in more detail.
+下面详细解释节点的类型。
 
 1.3.1. Client
 ^^^^^^^^^^^^^
