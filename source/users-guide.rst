@@ -7,7 +7,7 @@ Hyperledger Fabric CA是用于Hyperledger Fabric的证书颁发机构（CA）。
 
   * 注册身份，或者作为用户注册表连接到LDAP
   * 颁发注册证书（ECETS）
-  * 证书更新与撤销超
+  * 证书更新与撤销
 
 Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所述。
 
@@ -20,9 +20,9 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
 Table of Contents
 -----------------
 
-1. `Overview`_
+1. `总览`_
 
-2. `Getting Started`_
+2. `开始动手吧`_
 
    1. `Prerequisites`_
    2. `Install`_
@@ -68,36 +68,29 @@ Table of Contents
 
 8. `Troubleshooting`_
 
-
-Overview
+总览
 --------
 
-The diagram below illustrates how the Hyperledger Fabric CA server fits into the
-overall Hyperledger Fabric architecture.
+下面的图表说明了Hyperledger Fabric CA服务器如何适用于整个Hyperledger Fabric结构。
 
 .. image:: ./images/fabric-ca.png
 
-There are two ways of interacting with a Hyperledger Fabric CA server:
-via the Hyperledger Fabric CA client or through one of the Fabric SDKs.
-All communication to the Hyperledger Fabric CA server is via REST APIs.
-See `fabric-ca/swagger/swagger-fabric-ca.json` for the swagger documentation
-for these REST APIs.
-You may view this documentation via the http://editor2.swagger.io online editor.
+有两种方式与Hyperledger Fabric CA服务器交互：通过Hyperledger Fabric CA客户端或通过FabricSDK。
+对Fabric CA CA服务器进行的所有通信都是通过REST API实现的。
+参阅 `fabric-ca/swagger/swagger-fabric-ca.json` 来看看这些REST API的SWAGER文档。
+您可以通过 http://editor2.swagger.io 在线编辑器查看此文档。
 
-The Hyperledger Fabric CA client or SDK may connect to a server in a cluster
-of Hyperledger Fabric CA servers.   This is illustrated in the top right section
-of the diagram. The client routes to an HA Proxy endpoint which load balances
-traffic to one of the fabric-ca-server cluster members.
+Hyperledger Fabric CA客户端或SDK可以连接到Hyperledger Fabric CA服务器集群中的服务器。
+这在图的右上部分进行了说明。客户端路由到HA代理端点（Proxy endpoint），
+该端点将会将流量平衡负载到一个fabric-ca-server集群成员。
 
-All Hyperledger Fabric CA servers in a cluster share the same database for
-keeping track of identities and certificates.  If LDAP is configured, the identity
-information is kept in LDAP rather than the database.
+集群中所有的Hyperledger Fabric CA服务器共享同一数据库以跟踪身份和证书。
+如果配置LDAP，则将身份信息保存在LDAP中而不是数据库中。
 
-A server may contain multiple CAs.  Each CA is either a root CA or an
-intermediate CA.  Each intermediate CA has a parent CA which is either a
-root CA or another intermediate CA.
+服务器可以包含多个CAS。每个CA要么是根CA，要么是中间CA。
+每个中间CA都有一个父CA，它要么是根CA，要么是另一个中间CA。
 
-Getting Started
+开始动手吧
 ---------------
 
 Prerequisites
