@@ -1,23 +1,19 @@
-Fabric CA User's Guide
+Fabric CA 用户手册
 ======================
 
-The Hyperledger Fabric CA is a Certificate Authority (CA)
-for Hyperledger Fabric.
+Hyperledger Fabric CA是用于Hyperledger Fabric的证书颁发机构（CA）。
 
-It provides features such as:
+它提供了如下特征：
 
-  * registration of identities, or connects to LDAP as the user
-    registry
-  * issuance of Enrollment Certificates (ECerts)
-  * certificate renewal and revocation
+  * 注册身份，或者作为用户注册表连接到LDAP
+  * 颁发注册证书（ECETS）
+  * 证书更新与撤销超
 
-Hyperledger Fabric CA consists of both a server and a client component as
-described later in this document.
+Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所述。
 
-For developers interested in contributing to Hyperledger Fabric CA, see the
-`Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__ for more
-information.
-
+对于有兴趣参与Hyperledger Fabric CA的开发人员，请参见
+`Fabric CA repository <https://github.com/hyperledger/fabric-ca>`__
+获取更多信息。
 
 .. _Back to Top:
 
