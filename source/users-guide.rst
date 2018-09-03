@@ -17,20 +17,20 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
 
 .. _回到顶端:
 
-Table of Contents
+目录表
 -----------------
 
 1. `总览`_
 
 2. `开始动手吧`_
 
-   1. `Prerequisites`_
-   2. `Install`_
-   3. `Explore the Fabric CA CLI`_
+   1. `前提条件`_
+   2. `安装`_
+   3. `探索Fabric CA 命令行`_
 
-3. `Configuration Settings`_
+3. `配置设置`_
 
-   1. `A word on file paths`_
+   1. `文件路径`_
 
 4. `Fabric CA Server`_
 
@@ -93,45 +93,41 @@ Hyperledger Fabric CA客户端或SDK可以连接到Hyperledger Fabric CA服务�
 开始动手吧
 ---------------
 
-Prerequisites
+前提条件
 ~~~~~~~~~~~~~~~
 
--  Go 1.9+ installation
--  ``GOPATH`` environment variable is set correctly
-- libtool and libtdhl-dev packages are installed
+-  安装 Go 1.9+
+-  正确设置 ``GOPATH`` 环境变量
+-  安装 libtool 和 libtdhl-dev 包
 
-The following installs the libtool dependencies on Ubuntu:
+下面的命令在Ubuntu上安装libtool依赖:
 
 .. code:: bash
 
    sudo apt install libtool libltdl-dev
 
-The following installs the libtool dependencies on MacOSX:
+下面的命令在MacOSX上安装libtool依赖:
 
 .. code:: bash
 
    brew install libtool
 
-.. note:: libtldl-dev is not necessary on MacOSX if you instal
-          libtool via Homebrew
+.. note:: 如果你通过Homebrew安装libtool，那么libtldl-dev便没必要安装了
 
-For more information on libtool, see https://www.gnu.org/software/libtool.
+想要了解libtool的更多内容，查阅 https://www.gnu.org/software/libtool.
 
-For more information on libltdl-dev, see https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html.
+想要了解libltdl-dev的更多内容，查阅 https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html.
 
-Install
+安装
 ~~~~~~~
 
-The following installs both the `fabric-ca-server` and `fabric-ca-client` binaries
-in $GOPATH/bin.
+接下来的命令在 $GOPATH/bin 里安装 `fabric-ca-server` 和 `fabric-ca-client` 程序
 
 .. code:: bash
 
     go get -u github.com/hyperledger/fabric-ca/cmd/...
 
-Note: If you have already cloned the fabric-ca repository, make sure you are on the
-master branch before running the 'go get' command above. Otherwise, you might see the
-following error:
+.. note:: 如果您已经克隆了fabric-ca库，那么在运行上面的“go get”命令之前，请确保您在master分支上。否则，您可能会看到以下错误：
 
 ::
 
@@ -148,38 +144,33 @@ following error:
 
     package github.com/hyperledger/fabric-ca/cmd/fabric-ca-client: exit status 1
 
-Start Server Natively
+本地启动服务器
 ~~~~~~~~~~~~~~~~~~~~~
 
-The following starts the `fabric-ca-server` with default settings.
+下面命令动以默认设置启 `fabric-ca-server`。
 
 .. code:: bash
 
     fabric-ca-server start -b admin:adminpw
 
-The `-b` option provides the enrollment ID and secret for a bootstrap
-administrator; this is required if LDAP is not enabled with the "ldap.enabled"
-setting.
+`-b` 选项为启动管理员提供了注册（enrollment）ID和密码；如果LDAP没有启用“ldap.enabled”设置，则需要这样做。
 
-A default configuration file named `fabric-ca-server-config.yaml`
-is created in the local directory which can be customized.
+在本地目录中创建名为 `fabric-ca-server-config.yaml` 的配置文件，该目录也是可配置的。
 
-Start Server via Docker
+通过Docker启动服务器
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Docker Hub
 ^^^^^^^^^^^^
 
-Go to: https://hub.docker.com/r/hyperledger/fabric-ca/tags/
+访问: https://hub.docker.com/r/hyperledger/fabric-ca/tags/
 
-Find the tag that matches the architecture and version of fabric-ca
-that you want to pull.
+找到与你想拉取的fabric-ca的架构和版本相匹配的tag。
 
-Navigate to `$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`
-and open up docker-compose.yml in an editor.
+导航到 `$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server` ，
+并在编辑器中打开 `docker-compose.yml`。
 
-Change the `image` line to reflect the tag you found previously. The file
-may look like this for an x86 architecture for version beta.
+更改 `image` 行以反映您先前找到的tag。对于X86架构的beta版本该文件可能是这样的。
 
 .. code:: yaml
 
@@ -194,21 +185,21 @@ may look like this for an x86 architecture for version beta.
         - "./fabric-ca-server:/etc/hyperledger/fabric-ca-server"
       command: sh -c 'fabric-ca-server start -b admin:adminpw'
 
-Open up a terminal in the same directory as the docker-compose.yml file
-and execute the following:
+在与docker-compose.yml文件相同的目录中打开一个终端并执行以下操作：
 
 .. code:: bash
 
     # docker-compose up -d
 
-This will pull down the specified fabric-ca image in the compose file
-if it does not already exist, and start an instance of the fabric-ca
-server.
+如果compose文件中指定的fabric-ca映像不存在，则将拉取该映像，并启动fabric-ca服务器的实例。
 
-Building Your Own Docker image
+建立自己的码头工人形象您可以通过DOCKE撰写并启动服务器，如下所示。
+
+
+创建你自己的Docker镜像
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can build and start the server via docker-compose as shown below.
+您可以通过docker-compose创建并启动服务器，如下所示。
 
 .. code:: bash
 
@@ -217,8 +208,7 @@ You can build and start the server via docker-compose as shown below.
     cd docker/server
     docker-compose up -d
 
-The hyperledger/fabric-ca docker image contains both the fabric-ca-server and
-the fabric-ca-client.
+hyperledger/fabric-ca 镜像包含了fabric-ca-server和fabric-ca-client。
 
 .. code:: bash
 
@@ -227,28 +217,24 @@ the fabric-ca-client.
     # cd docker/server
     # docker-compose up -d
 
-Explore the Fabric CA CLI
+探索Fabric CA 命令行
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This section simply provides the usage messages for the Fabric CA server and client
-for convenience.  Additional usage information is provided in following sections.
+本节简单地为织物Fabric CA服务器和客户端提供使用消息。
+在下面的章节中将会提供附加的使用信息。
 
-The following links shows the :doc:`Server Command Line <servercli>` and
-:doc:`Client Command Line <clientcli>`.
+下面的链接显示 :doc:`Server Command Line <servercli>` 和
+:doc:`Client Command Line <clientcli>`。
 
-.. note:: Note that command line options that are string slices (lists) can be
-          specified either by specifying the option with comma-separated list
-          elements or by specifying the option multiple times, each with a
-          string value that make up the list. For example, to specify
-          ``host1`` and ``host2`` for the ``csr.hosts`` option, you can either
-          pass ``--csr.hosts 'host1,host2'`` or
-          ``--csr.hosts host1 --csr.hosts host2``. When using the former format,
-          please make sure there are no space before or after any commas.
+.. note:: 注意，作为字符串片（列表）的命令行选项，可以通过两种方式来指定：即使用逗号分隔的列表元素，或者多次指定选项，
+          每个选项都具有组成列表的字符串值。例如，要为``csr.hosts``选项指定 ``host1`` 和 ``host2`` ，
+          可以传递 ``--csr.hosts 'host1,host2'`` 或 ``--csr.hosts host1 --csr.hosts host2`` 。
+          使用前一种格式时，请确保在逗号之前或之后没有空格。
 
 `回到顶端`_
 
-Configuration Settings
-~~~~~~~~~~~~~~~~~~~~~~
+配置设置
+---------------
 
 The Fabric CA provides 3 ways to configure settings on the Fabric CA server
 and client. The precedence order is:
@@ -295,8 +281,8 @@ The same approach applies to fabric-ca-server, except instead of using
 
 .. _server:
 
-A word on file paths
-^^^^^^^^^^^^^^^^^^^^^
+文件路径
+~~~~~~~~~~~~~~~
 All the properties in the Fabric CA server and client configuration file
 that specify file names support both relative and absolute paths.
 Relative paths are relative to the config directory, where the
