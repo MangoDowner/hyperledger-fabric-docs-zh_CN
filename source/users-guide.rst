@@ -47,8 +47,8 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
 
    1. `注册启动身份`_
    2. `Registering a new identity`_
-   3. `Enrolling a peer identity`_
-   4. `Getting a CA certificate chain from another Fabric CA server`_
+   3. `注册（enroll）一个peer身份`_
+   4. `从另一个Fabric CA服务器获得CA证书链`_
    5. `重新注册身份`_
    6. `吊销证书或身份`_
    7. `Generating a CRL (Certificate Revocation List)`_
@@ -279,7 +279,7 @@ Fabric CA提供3种方式来配置Fabric CA服务器和客户机上的设置。
 
 Fabric CA服务器和客户端配置文件中指定文件名的所有属性都支持相对路径和绝对路径。
 相对路径与配置文件所在的配置目录相对。例如，如果配置目录是 ``~/config``  ，并且tls部分如下所示，
-则Fabric CA服务器或客户端将在``~/config`` 目录中查找 ``cert.pem``文件、
+则Fabric CA服务器或客户端将在 ``~/config`` 目录中查找 ``cert.pem``文件、
 ``~/config/certs`` 目录中的 ``cert.pem`` 文件和 ``/abs/path`` 目录中的 ``key.pem`` 文件
 
 .. code:: yaml
@@ -325,7 +325,7 @@ in the server's home directory.
 初始化服务器
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-通过如下方式初始化abric CA服务器:
+通过如下方式初始化Fabric CA服务器:
 
 .. code:: bash
 
@@ -375,7 +375,7 @@ in the server's home directory.
 
 ``fabric-ca-server init`` 命令还在服务器的主目录中生成名为 **fabric-ca-server-config.yaml** 的默认配置文件。
 
-如果希望Fabric CA服务器使用您提供的CA签名证书和密钥文件，则必须将文件分别放在``ca.certfile``和 ``ca.keyfile`` 引用的位置。
+如果希望Fabric CA服务器使用您提供的CA签名证书和密钥文件，则必须将文件分别放在 ``ca.certfile`` 和 ``ca.keyfile`` 引用的位置。
 两个文件必须是PEM编码的，且不能是已加密的。更具体地说，CA证书文件的内容必须以 ``-----BEGIN CERTIFICATE-----`` 开始，
 而密钥文件的内容必须以 ``-----BEGIN PRIVATE KEY-----`` 开始，而不是 ``-----BEGIN ENCRYPTED PRIVATE KEY-----`` 开始。
 
@@ -418,10 +418,10 @@ CSR可以定制生成X.509证书和支持椭圆曲线（ECDSA）的密钥。
 如果服务器没有被预先初始化，它将在第一次启动时初始化它自己。
 在此初始化期间，如果还没有ca-cert.pem和ca-key.pem文件，服务器将生成它们，
 如果它们不存在，服务器还将创建默认的配置文件。
-请参见 `Initialize the Fabric CA server <#initialize>`__ 部分。
+请参见 `初始化Fabric CA服务器 <#initialize>`__ 部分。
 
 除非Fabric CA服务器被配置为使用LDAP，否则它必须配置有至少一个预先注册的引导身份，
-以使您能够登记（register）和注册（enroll）其他标识。``-b``  选项指定引导身份的名称和密码。
+以使您能够登记（register）和注册（enroll）其他身份。``-b``  选项指定引导身份的名称和密码。
 
 要使Fabric CA服务器侦听 ``https`` 而不是 ``http``，将 ``tls.enabled`` 设定为 ``true``。
 
@@ -443,7 +443,7 @@ Fabric CA服务器现在应该监听端口7054。
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 本节介绍如何配置Fabric CA服务器以连接到PostgreSQL或MySQL数据库。
-默认的数据库是SQLite，默认的数据库文件是Fabric Ca服务器的主目录中的``fabric-ca-server.db``。
+默认的数据库是SQLite，默认的数据库文件是Fabric Ca服务器的主目录中的 ``fabric-ca-server.db``。
 
 如果不关心在集群中运行Fabric CA服务器，则可以跳过本节；
 否则，必须按照以下描述配置PostgreSQL或MySQL。
@@ -850,7 +850,6 @@ Note: If using TLS, need to use ``mode tcp``.
 
 cacount:
 ^^^^^^^^
-CCANUT。主目录将与服务器目录相对应。使用此选项，目录结构如下：
 
 `cacount` 提供了启动X个默认附加CA的快速方法。 主目录将与服务器目录相对应。使用此选项，目录结构如下：
 
@@ -928,7 +927,7 @@ CA配置文件必须至少包含以下内容：
 
     fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
 
-对于其他中间CA标志，请参见 `Fabric CA server's configuration file format`_ 部分。
+对于其他中间CA标志，请参见 `Fabric CA 服务器的配置文件格式`_ 部分。
 
 升级服务器
 ~~~~~~~~~~~~~~~~~~~~
@@ -1314,68 +1313,58 @@ Viper treats map keys as case insensitive and always returns lowercase value. To
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name client1 --id.type client --id.affiliation bu1.department1.Team1
 
-Enrolling a peer identity
+注册（enroll）一个peer身份
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now that you have successfully registered a peer identity, you may now
-enroll the peer given the enrollment ID and secret (i.e. the *password*
-from the previous section).  This is similar to enrolling the bootstrap identity
-except that we also demonstrate how to use the "-M" option to populate the
-Hyperledger Fabric MSP (Membership Service Provider) directory structure.
+既然您已经成功登记（register）了peer身份，那么现在您可以用给定的注册ID和密码（即来自前一部分的 *密码* ）来注册peer。
+这与注册引导身份类似，除了我们还演示了如何使用“-M”选项来填充Hyperledger Fabric MSP（成员服务提供商）目录结构。
 
-The following command enrolls peer1.
-Be sure to replace the value of the "-M" option with the path to your
-peer's MSP directory which is the
-'mspConfigPath' setting in the peer's core.yaml file.
-You may also set the FABRIC_CA_CLIENT_HOME to the home directory of your peer.
+下面的命令注册peer1。确保将“-M”选项的值替换为你peer的MSP目录的路径，
+该目录是peer的core.yaml文件中的“mspConfigPath”设置。
+您还可以将 FABRIC_CA_CLIENT_HOME 设置为peer的主目录。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client enroll -u http://peer1:peer1pw@localhost:7054 -M $FABRIC_CA_CLIENT_HOME/msp
 
-Enrolling an orderer is the same, except the path to the MSP directory is
-the 'LocalMSPDir' setting in your orderer's orderer.yaml file.
+注册排序节点是一样的，除了MSP目录的路径是排序节点orderer.yaml文件中的“LocalMSPDir”设置。
 
-All enrollment certificates issued by the fabric-ca-server have organizational
-units (or "OUs" for short) as follows:
+fabric-ca-server服务器发出的所有注册证书都有组织单位（简称“UE”）：
 
-1. The root of the OU hierarchy equals the identity type
-2. An OU is added for each component of the identity's affiliation
+1. OU层次结构的根等于身份类型。
+2. 份标识的每个组件添加了OU
 
-For example, if an identity is of type `peer` and its affiliation is
-`department1.team1`, the identity's OU hierarchy (from leaf to root) is
-`OU=team1, OU=department1, OU=peer`.
+例如，如果身份是 `peer` 类型的，并且它的affiliation是 `department1.team1` ，
+则身份的OU层次结构（从叶到根）是 `OU=team1, OU=department1, OU=peer`。
 
-Getting a CA certificate chain from another Fabric CA server
+从另一个Fabric CA服务器获得CA证书链
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In general, the cacerts directory of the MSP directory must contain the certificate authority chains
-of other certificate authorities, representing all of the roots of trust for the peer.
+通常，MSP目录的cacerts目录必须包含其他证书颁发机构的证书授权链（certificate authority chains），代表peer的所有信任根。
 
-The ``fabric-ca-client getcainfo`` command is used to retrieve these certificate chains from other
-Fabric CA server instances.
+``fabric-ca-client getcainfo`` 命令用于从其他Fabric CA服务器实例检索这些证书链。
 
-For example, the following will start a second Fabric CA server on localhost
-listening on port 7055 with a name of "CA2".  This represents a completely separate
-root of trust and would be managed by a different member on the blockchain.
+例如，下面将启动第二个Fabric CA服务器，在本地主机上用“CA2”的名称侦听端口7055。
+这表示一个完全分离的信任根，并且将由区块链上的不同成员管理。
 
 .. code:: bash
 
     export FABRIC_CA_SERVER_HOME=$HOME/ca2
     fabric-ca-server start -b admin:ca2pw -p 7055 -n CA2
 
-The following command will install CA2's certificate chain into peer1's MSP directory.
+下面的命令会将CA2的证书链安装进peer1的MSP目录.
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client getcainfo -u http://localhost:7055 -M $FABRIC_CA_CLIENT_HOME/msp
 
-By default, the Fabric CA server returns the CA chain in child-first order. This means that each CA
-certificate in the chain is followed by its issuer's CA certificate. If you need the Fabric CA server
-to return the CA chain in the opposite order, then set the environment variable ``CA_CHAIN_PARENT_FIRST``
-to ``true`` and restart the Fabric CA server. The Fabric CA client will handle either order appropriately.
+默认情况下，Fabric CA服务器以子代优先（child-first）的顺序返回CA链。
+这意味着链中的每个CA证书后面跟着它的颁发者CA证书。
+如果需要Fabric CA服务器以相反的顺序返回CA链，则将环境变量 ``CA_CHAIN_PARENT_FIRST`` 设置为 ``true`` ，
+并重新启动Fabric CA服务器。
+Fabric CA客户端将适当地处理两种顺序。
 
 重新注册身份
 ~~~~~~~~~~~~~~~~~~~~~~~
