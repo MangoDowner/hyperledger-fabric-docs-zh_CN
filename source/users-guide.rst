@@ -52,7 +52,7 @@ Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所�
    5. `重新注册身份`_
    6. `吊销证书或身份`_
    7. `Generating a CRL (Certificate Revocation List)`_
-   8. `Attribute-Based Access Control`_
+   8. `基于属性的访问控制`_
    9. `Dynamic Server Configuration Update`_
    10. `启用TLS`_
    11. `Contact specific CA instance`_
@@ -1466,85 +1466,69 @@ gencrl命令还将接受 `--expireafter` 和 `--expirebefore` 标记，
 
 只有在服务器上配置mutual TLS时才需要 **client** 选项。
 
-Attribute-Based Access Control
+基于属性的访问控制
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Access control decisions can be made by chaincode (and by the Hyperledger Fabric runtime)
-based upon an identity's attributes.  This is called
-**Attribute-Based Access Control**, or **ABAC** for short.
+访问控制决策可以由基于身份属性的链表（和由Hyperledger Fabric运行库）来实现。
+这简称为 **基于属性的访问控制（Attribute-Based Access Control）**，简称 **ABAC**。
 
-In order to make this possible, an identity's enrollment certificate (ECert)
-may contain one or more attribute name and value.  The chaincode then
-extracts an attribute's value to make an access control decision.
+为了使这成为可能，身份的登记（enrollment）证书（ECert）可以包含一个或多个属性名称和值。
+然后，链码提取属性值来进行访问控制决策。
 
-For example, suppose that you are developing application *app1* and want a
-particular chaincode operation to be accessible only by app1 administrators.
-Your chaincode could verify that the caller's certificate (which was issued by
-a CA trusted for the channel) contains an attribute named *app1Admin* with a
-value of *true*.  Of course the name of the attribute can be anything and the
-value need not be a boolean value.
+例如，假设您正在开发应用程序 *app1*，并且希望某个特定的链码操作只能由app1管理员访问。
+您的链码可以验证调用者的证书（它是由通道信任的CA颁发的）是否包含名为 *app1Admin* 值为 *true* 的属性。
+当然，属性的名称可以是任何东西，并且该值不必是布尔值。
 
-So how do you get an enrollment certificate with an attribute?
-There are two methods:
+那么，如何获得具有属性的登记证书呢？
+有两种方法：
 
-1.   When you register an identity, you can specify that an enrollment certificate
-     issued for the identity should by default contain an attribute.  This behavior
-     can be overridden at enrollment time, but this is useful for establishing
-     default behavior and, assuming registration occurs outside of your application,
-     does not require any application change.
+1.   注册身份时，可以指定，为某身份颁发的登记证书默认应该包含一个属性。
+     可以在登记时重写此行为，但是这对于建立默认行为非常有用，并且假设登记发生在应用程序之外，则不需要任何应用程序更改。
 
-     The following shows how to register *user1* with two attributes:
-     *app1Admin* and *email*.
-     The ":ecert" suffix causes the *appAdmin* attribute to be inserted into user1's
-     enrollment certificate by default, when the user does not explicitly request
-     attributes at enrollment time.  The *email* attribute is not added
-     to the enrollment certificate by default.
+     下面展示如何注册有两个属性的 *user1* ：
+     *app1Admin* 和 *email*.
+     当用户在注册时没有显式请求属性时，":ecert" 后缀导致默认情况下将 *appAdmin* 属性插入用户1的注册证书。
+     默认情况下，*email* 属性不会添加到登记证书中。
 
 .. code:: bash
 
      fabric-ca-client register --id.name user1 --id.secret user1pw --id.type user --id.affiliation org1 --id.attrs 'app1Admin=true:ecert,email=user1@gmail.com'
 
-2. When you enroll an identity, you may explicitly request that one or more attributes
-   be added to the certificate.
-   For each attribute requested, you may specify whether the attribute is
-   optional or not.  If it is not requested optionally and the identity does
-   not possess the attribute, an error will occur.
 
-   The following shows how to enroll *user1* with the *email* attribute,
-   without the *app1Admin* attribute, and optionally with the *phone*
-   attribute (if the user possesses the *phone* attribute).
+2. 当您注册身份时，可以显式请求将一个或多个属性添加到证书中。
+   对于所请求的每个属性，可以指定属性是否是可选的。
+   如果请求的属性不是可选的，并且身份不具有该属性，则会发生错误。
+
+   下面显示了如何注册具有 *email* 属性、没有 *app1Admin* 属性以及可选 *phone* 属性的*user1*（如果用户拥有phone属性）。
 
 .. code:: bash
 
    fabric-ca-client enroll -u http://user1:user1pw@localhost:7054 --enrollment.attrs "email,phone:opt"
 
-The table below shows the three attributes which are automatically registered for every identity.
+下表显示了每个身份自动注册的三个属性。
 
 ===================================   =====================================
-     Attribute Name                               Attribute Value
+     属性名                                  属性值
 ===================================   =====================================
-  hf.EnrollmentID                        The enrollment ID of the identity
-  hf.Type                                The type of the identity
-  hf.Affiliation                         The affiliation of the identity
+  hf.EnrollmentID                        身份的登记ID（enrollment ID）
+  hf.Type                                身份类型
+  hf.Affiliation                         身份的（affiliation）
 ===================================   =====================================
 
-To add any of the above attributes **by default** to a certificate, you must
-explicitly register the attribute with the ":ecert" specification.
-For example, the following registers identity 'user1' so that
-the 'hf.Affiliation' attribute will be added to an enrollment certificate if
-no specific attributes are requested at enrollment time.  Note that the
-value of the affiliation (which is 'org1') must be the same in both the
-'--id.affiliation' and the '--id.attrs' flags.
+为了在 **默认情况** 下将上述任何属性添加到证书，您必须显式地向 ":ecert" 规范注册该属性。
+例如，下面注册身份“user1”，以便在登记时没有请求特定属性的情况下，将 'hf.Affiliation'属性添加到登记证书。
+注意，从属关系（即“org1”）的值必须在 '--id.affiliation' 和 '--id.attrs' 标志中都相同。
 
 .. code:: bash
 
     fabric-ca-client register --id.name user1 --id.secret user1pw --id.type user --id.affiliation org1 --id.attrs 'hf.Affiliation=org1:ecert'
 
-For information on the chaincode library API for Attribute-Based Access Control,
-see `https://github.com/hyperledger/fabric/tree/release-1.1/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/tree/release-1.1/core/chaincode/lib/cid/README.md>`_
+有关基于属性的访问控制的链库API的信息，请参见
+`https://github.com/hyperledger/fabric/tree/release-1.1/core/chaincode/lib/cid/README.md <https://github.com/hyperledger/fabric/tree/release-1.1/core/chaincode/lib/cid/README.md>`_
 
+有关端到端（nd-to-end）演示基于属性的访问控制的示例，请参见
 For an end-to-end sample which demonstrates Attribute-Based Access Control and more,
-see `https://github.com/hyperledger/fabric-samples/tree/release-1.1/fabric-ca/README.md <https://github.com/hyperledger/fabric-samples/tree/release-1.1/fabric-ca/README.md>`_
+`https://github.com/hyperledger/fabric-samples/tree/release-1.1/fabric-ca/README.md <https://github.com/hyperledger/fabric-samples/tree/release-1.1/fabric-ca/README.md>`_
 
 Dynamic Server Configuration Update
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1575,57 +1559,54 @@ An authorization failure will occur if the client identity does not satisfy all 
 
 The following shows how to add, modify, and remove an affiliation.
 
-Getting Identity Information
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+获取身份信息
+^^^^^^
 
-A caller may retrieve information on a identity from the fabric-ca server as long as the caller meets
-the authorization requirements highlighted in the section above. The following command shows how to get an
-identity.
+调用者可以从fabric-ca服务器检索关于身份的信息，只要调用者满足上述部分中强调的授权要求。
+下面的命令显示如何获取身份。
 
 .. code:: bash
 
     fabric-ca-client identity list --id user1
 
-A caller may also request to retrieve information on all identities that it is authorized to see by
-issuing the following command.
+调用者也可以请求通过发出以下命令，来检索其有权看到的所有身份的信息。
 
 .. code:: bash
 
     fabric-ca-client identity list
 
-Adding an identity
+增加一个身份
 """""""""""""""""""
 
-The following adds a new identity for 'user1'. Adding a new identity performs the same action as registering an
-identity via the 'fabric-ca-client register' command. There are two available methods for adding a new identity.
-The first method is via the `--json` flag where you describe the identity in a JSON string.
+下面为'user1'添加一个新的身份。添加新的身份与通过 'fabric-ca-client register' 命令注册身份执行相同的操作。
+有两种可用的方法来添加新的标识。第一种方法是通过 `--json` 标记，传递一个描述身份的JSON字符串。
 
 .. code:: bash
 
     fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "user", "affiliation": "org1", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
 
-The following adds a user with root affiliation. Note that an affiliation name of "." means the root affiliation.
+下面添加一个具有根关联的用户。注意，"." 的从属名称表示根关联。
 
 .. code:: bash
 
     fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "user", "affiliation": ".", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
 
-The second method for adding an identity is to use direct flags. See the example below for adding 'user1'.
+添加身份的第二种方法是使用直接标志。请参阅下面的示例添加 'user1'。
 
 .. code:: bash
 
     fabric-ca-client identity add user1 --secret user1pw --type user --affiliation . --maxenrollments 1 --attrs hf.Revoker=true
 
-The table below lists all the fields of an identity and whether they are required or optional, and any default values they might have.
+下表列出了身份的所有字段，以及它们是必需的还是可选的，以及它们可能具有的任何默认值。
 
 +----------------+------------+------------------------+
-| Fields         | Required   | Default Value          |
+| 字段            | 必须        | 默认值                  |
 +================+============+========================+
 | ID             | Yes        |                        |
 +----------------+------------+------------------------+
 | Secret         | No         |                        |
 +----------------+------------+------------------------+
-| Affiliation    | No         | Caller's Affiliation   |
+| Affiliation    | No         | 调用者的 Affiliation     |
 +----------------+------------+------------------------+
 | Type           | No         | client                 |
 +----------------+------------+------------------------+
@@ -1822,8 +1803,6 @@ issuing the following command.
 
 列出证书信息
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
 
 调用方可见的证书包括：
 
