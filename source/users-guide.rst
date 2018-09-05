@@ -3,10 +3,10 @@ Fabric CA 用户手册
 
 Hyperledger Fabric CA是用于Hyperledger Fabric的证书颁发机构（CA）。
 
-它提供了如下特征：
+它提供了如下功能：
 
   * 注册身份，或者作为用户注册表连接到LDAP
-  * 颁发注册证书（ECETS）
+  * 颁发注册（enroll）证书（ECETS）
   * 证书更新与撤销
 
 Hyperledger Fabric CA 由服务器和客户端组件组成，如本文后面所述。
@@ -297,28 +297,22 @@ Fabric CA服务器和客户端配置文件中指定文件名的所有属性都�
 Fabric CA 服务器
 ----------------
 
-This section describes the Fabric CA server.
+该部分探讨Fabric CA服务器。
 
-You may initialize the Fabric CA server before starting it. This provides an
-opportunity for you to generate a default configuration file that can be
-reviewed and customized before starting the server.
+在启动Fabric CA server之前，您可以初始化它。
+这为您提供了生成默认配置文件的机会，可以在启动服务器之前检查和定制该文件。
 
-The Fabric CA server's home directory is determined as follows:
-  - if the --home command line option is set, use its value
-  - otherwise, if the ``FABRIC_CA_SERVER_HOME`` environment variable is set, use
-    its value
-  - otherwise, if ``FABRIC_CA_HOME`` environment variable is set, use
-    its value
-  - otherwise, if the ``CA_CFG_PATH`` environment variable is set, use
-    its value
-  - otherwise, use current working directory
+Fabric CA服务器的主目录确定如下：
 
-For the remainder of this server section, we assume that you have set
-the ``FABRIC_CA_HOME`` environment variable to
-``$HOME/fabric-ca/server``.
+  - 如果设置了--home命令行选项，使用它的值
+  - 否则，如果设置了 ``FABRIC_CA_SERVER_HOME`` 环境变量，则使用其值
+  - 否则，如果设置了 ``FABRIC_CA_HOME`` 环境变量，则使用其值。
+  - 否则，如果设置了 ``CA_CFG_PATH`` 环境变量，则使用其值。
+  - 否则，使用当前工作目录
 
-The instructions below assume that the server configuration file exists
-in the server's home directory.
+对于服务器部分的其余部分，我们假设您已经将 `FABRIC_CA_HOME`` 环境变量设置为 ``$HOME/fabric-ca/server`` 。
+
+下面的说明假定服务器配置文件存在于服务器的主目录中。
 
 .. _initialize:
 
@@ -394,7 +388,7 @@ CSR可以定制生成X.509证书和支持椭圆曲线（ECDSA）的密钥。
 
 算法和密钥大小的选择是基于安全需求的。
 
-椭圆曲线（ECDSA）提供以下密钥尺寸选择：
+椭圆曲线（ECDSA）提供以下密钥尺寸选择:
 
 +--------+--------------+-----------------------+
 | 尺寸    | ASN1 OID     | 签名算法               |
@@ -1054,10 +1048,6 @@ Fabric CA 客户端
 
 Fabric CA客户端的主目录确定如下：
 
-
-This section describes how to use the fabric-ca-client command.
-
-The Fabric CA client's home directory is determined as follows:
   - 如果设置了 --home 命令行选项，则使用它的值
   - 否则，如果设置了 ``FABRIC_CA_CLIENT_HOME`` 环境变量，则使用其值
   - 否则，如果设置了 ``FABRIC_CA_HOME`` 环境变量，则使用其值。
@@ -1107,52 +1097,34 @@ CSR字段来描述字段。
 注册命令在Fabric CA客户端的 ``msp`` 目录的子目录中存储注册证书（ECert）、相应的私钥和CA证书链PEM文件。
 您将看到指示存储PEM文件的位置的消息。
 
-登记一个新的身份
+注册（register）一个新的身份
 ~~~~~~~~
 
 执行注册请求的身份必须当场（currently）注册，并且还必须具有注册正在注册的身份类型的适当权限。
 
 特别地，在注册期间，由Fabric CA服务器进行的三个授权检查如下：
 
-1. The registrar (i.e. the invoker) must have the "hf.Registrar.Roles" attribute with a
-   comma-separated list of values where one of the values equals the type of
-   identity being registered; for example, if the registrar has the
-   "hf.Registrar.Roles" attribute with a value of "peer,app,user", the registrar
-   can register identities of type peer, app, and user, but not orderer.
+1. 注册者（Registrar，即调用者：invoker）必须有"hf.registrar.roles"，其值为逗号分割的列表，列表其一就是注册着调用的身份角色。
+   比如说，如果注册者的"hf.Registrar.Roles"有值"peer,app,user"，注册者可以注册的身份就有
+   peer，app和user，但是没有orderer。
 
-2. The affiliation of the registrar must be equal to or a prefix of
-   the affiliation of the identity being registered.  For example, an registrar
-   with an affiliation of "a.b" may register an identity with an affiliation
-   of "a.b.c" but may not register an identity with an affiliation of "a.c".
-   If root affiliation is required for an identity, then the affiliation request
-   should be a dot (".") and the registrar must also have root affiliation.
-   If no affiliation is specified in the registration request, the identity being
-   registered will be given the affiliation of the registrar.
+2. 注册者的归属关系必须等于或是注册身份归属关系的前缀。
+   例如，具有“a.b”归属关系的注册官可以在“a.b.c”归属关系注册身份，但不可以在“a.c”归属关系注册身份。
+   如果标识需要根关联，那么关联请求应该是点（“.”），注册者也必须具有根关联。
+   如果在注册请求中没有指定归属关系，则正在注册的身份将被给予注册者的从属关系。
 
-3. The registrar can register a user with attributes if all of the following conditions
-   are satisfied:
+3. 如果满足以下所有条件，则注册者可以向用户注册属性：
 
-   - Registrar can register Fabric CA reserved attributes that have the prefix 'hf.'
-     only if the registrar possesses the attribute and it is part of the value of the
-     hf.Registrar.Attributes' attribute. Furthermore, if the attribute is of type list
-     then the value of attribute being registered must be equal to or a subset of the
-     value that the registrar has. If the attribute is of type boolean, the registrar
-     can register the attribute only if the registrar's value for the attribute is 'true'.
-   - Registering custom attributes (i.e. any attribute whose name does not begin with 'hf.')
-     requires that the registrar has the 'hf.Registar.Attributes' attribute with the value of
-     the attribute or pattern being registered. The only supported pattern is a string with
-     a "*" at the end. For example, "a.b.*" is a pattern which matches all attribute names
-     beginning with "a.b.". For example, if the registrar has hf.Registrar.Attributes=orgAdmin,
-     then the only attribute which the registrar can add or remove from an identity is the
-     'orgAdmin' attribute.
-   - If the requested attribute name is 'hf.Registrar.Attributes', an additional
-     check is performed to see if the requested values for this attribute are equal
-     to or a subset of the registrar's values for 'hf.Registrar.Attributes'. For this
-     to be true, each requested value must match a value in the registrar's value for
-     'hf.Registrar.Attributes' attribute. For example, if the registrar's value for
-     'hf.Registrar.Attributes' is 'a.b.*, x.y.z' and the requested attribute
-     value is 'a.b.c, x.y.z', it is valid because 'a.b.c' matches 'a.b.*' and 'x.y.z'
-     matches the registrar's 'x.y.z' value.
+   - 只有当注册者拥有该属性并且它是 'hf.Registrar.Attributes' 属性值的一部分时，Registrar才能注册具有前缀'hf.'的Fabric CA保留属性。
+     此外，如果属性是类型列表，那么正在注册的属性的值必须等于或为注册者所拥有的值的子集。
+     如果属性是布尔类型，则注册器只能在注册者对于属性的值是“true”时才能注册该属性。
+   - 注册自定义属性（即，名称不以“hf.”开头的任何属性）要求注册器具有“hf.Registar.Attributes”属性，该属性或模式的值正在注册。
+     唯一支持的模式是一个结尾为“*”的字符串。例如，“A.B.*”是一个与“A.B”开头的所有属性名称相匹配的模式。
+     例如，如果注册器具有hf.Registrar.Attributes=orgAdmin，则注册器可以从标识中添加或删除的唯一属性是“orgAdmin”属性。
+   - 如果所请求的属性名是“hf.Registrar.Attributes”，则执行附加检查，以查看此属性的请求值是否等于注册器的“hf.Registrar.Attributes”值的子集。
+     为了做到这一点，每个请求的值必须与注册中心的“hf.Registrar.Attributes”属性的值匹配。
+     例如，如果注册器的“hf.Registrar.Attributes”的值是“a.b.*，x.y.z”，并且请求的属性值是“a.b.c，x.y.z”，则它是有效的，
+     因为“a.b.c”匹配“a.b.*”，而“x.y.z”匹配注册器的“x.y.z”值。
 
 Examples:
    Valid Scenarios:
@@ -1209,44 +1181,35 @@ Examples:
 | hf.IntermediateCA           | Boolean    | Identity is able to enroll as an intermediate CA if attribute value is true                                |
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
 
-Note: When registering an identity, you specify an array of attribute names and values. If the array
-specifies multiple array elements with the same name, only the last element is currently used. In other words,
-multi-valued attributes are not currently supported.
+.. note:: 当注册身份时，指定属性名称和值的数组。如果数组指定具有多个相同名称的数组元素，则当前只使用最后一个元素。
+          换句话说，当前不支持多值属性。
 
-The following command uses the **admin** identity's credentials to register a new
-user with an enrollment id of "admin2", an affiliation of
-"org1.department1", an attribute named "hf.Revoker" with a value of "true", and
-an attribute named "admin" with a value of "true".  The ":ecert" suffix means that
-by default the "admin" attribute and its value will be inserted into the user's
-enrollment certificate, which can then be used to make access control decisions.
+下面的命令使用 **admin** 身份的凭证向新用户注册一个新的user，其注册ID为“admin2”、
+归属关系为“org1.department1”、属性“hf.Revoker”的值为“true”，属性“admin”值为“true”。
+":ecert" 后缀意味着默认情况下，“admin”属性及其值将被插入用户的注册证书中，然后该证书可用于作出访问控制决策。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin2 --id.affiliation org1.department1 --id.attrs 'hf.Revoker=true,admin=true:ecert'
 
-The password, also known as the enrollment secret, is printed.
-This password is required to enroll the identity.
-This allows an administrator to register an identity and give the
-enrollment ID and the secret to someone else to enroll the identity.
+密码，也称为登记秘密（enrollment secret）被打印出来。
+此密码是enroll身份所必需的。这允许管理员注册身份，并将enrollment ID和秘密交给其他人来注册身份。
 
-Multiple attributes can be specified as part of the --id.attrs flag, each
-attribute must be comma separated. For an attribute value that contains a comma,
-the attribute must be encapsulated in double quotes. See example below.
+可以将多个属性指定为 --id.attrs 标志的一部分，每个属性必须逗号分隔。
+对于包含逗号的属性值，属性必须封装在双引号中。见下面的例子。
 
 .. code:: bash
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,user",hf.Revoker=true'
 
-or
+或者
 
 .. code:: bash
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,user"' --id.attrs hf.Revoker=true
 
-You may set default values for any of the fields used in the register command
-by editing the client's configuration file.  For example, suppose the configuration
-file contains the following:
+通过编辑客户端的配置文件，可以为注册命令中使用的任何字段设置默认值。例如，假设配置文件包含以下内容：
 
 .. code:: yaml
 
@@ -1261,37 +1224,31 @@ file contains the following:
         - name: anotherAttrName
           value: anotherAttrValue
 
-The following command would then register a new identity with an enrollment id of
-"admin3" which it takes from the command line, and the remainder is taken from the
-configuration file including the identity type: "user", affiliation: "org1.department1",
-and two attributes: "hf.Revoker" and "anotherAttrName".
+随后，下面的命令将使用从命令行获取的“admin3”的enrollment id注册身份，其余的从配置文件中获取，
+包括身份类型"user"、归属关系"org1.department1"。以及两个属性："hf.Revoker"和"anotherAttrName"。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin3
 
-To register an identity with multiple attributes requires specifying all attribute names and values
-in the configuration file as shown above.
+要注册具有多个属性的身份，需要在配置文件中指定所有属性名和值，如上所示。
 
-Setting `maxenrollments` to 0 or leaving it out from the configuration will result in the identity
-being registered to use the CA's max enrollment value. Furthermore, the max enrollment value for
-an identity being registered cannot exceed the CA's max enrollment value. For example, if the CA's
-max enrollment value is 5. Any new identity must have a value less than or equal to 5, and also
-can't set it to -1 (infinite enrollments).
+将 `maxenrollments` 设置为0，或者将其从配置中删除，将导致注册的身份使用CA的最大注册值。
+此外，正在注册的身份的最大注册值不能超过CA的最大注册值。
+例如，如果CA的最大注册值是5。任何新的身份必须具有小于或等于5的值，也不能将其设置为-1（无限的注册）。
 
-Next, let's register a peer identity which will be used to enroll the peer in the following section.
-The following command registers the **peer1** identity.  Note that we choose to specify our own
-password (or secret) rather than letting the server generate one for us.
+接下来，让我们注册一个peer身份，它将用于在下面的部分中注册peer。
+下面的命令enroll  **peer1**身份。
+请注意，我们选择指定自己的密码（或秘密），而不是让服务器为我们生成一个密码。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name peer1 --id.type peer --id.affiliation org1.department1 --id.secret peer1pw
 
-Note that affiliations are case sensitive except for the non-leaf affiliations that are specified in
-the server configuration file, which are always stored in lower case. For example, if the affiliations
-section of the server configuration file looks like this:
+注意，除了在服务器配置文件中指定的非叶子（non-leaf）关联之外，关联是区分大小写的，
+这些非叶子关联总是以小写的形式存储。例如，如果服务器配置文件的归属关系部分看起来像这样：
 
 .. code:: bash
 
@@ -1303,17 +1260,15 @@ section of the server configuration file looks like this:
         - Department2
         - Department3
 
-`BU1`, `Department1`, `BU2` are stored in lower case. This is because Fabric CA uses Viper to read configuration.
-Viper treats map keys as case insensitive and always returns lowercase value. To register an identity with
-`Team1` affiliation, `bu1.department1.Team1` would need to be specified to the
-`--id.affiliation` flag as shown below:
+这是因为Fabric CA使用Viper读取配置。Viper对待map keys不区分大小写，总是返回小写的值。
+为了向 `Team1` 归属关系注册身份，`--id.affiliation` 标志` 需要指定为 bu1.department1.Team1`，如下所示：
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name client1 --id.type client --id.affiliation bu1.department1.Team1
 
-注册（enroll）一个peer身份
+登记（enroll）一个peer身份
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 既然您已经成功登记（register）了peer身份，那么现在您可以用给定的注册ID和密码（即来自前一部分的 *密码* ）来注册peer。
