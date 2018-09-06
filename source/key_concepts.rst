@@ -1,4 +1,4 @@
-Key Concepts
+核心概念
 ============
 
 .. toctree::
