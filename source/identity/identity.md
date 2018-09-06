@@ -1,260 +1,191 @@
-# Identity
+# 身份
 
-## What is an Identity?
 
-The different actors in a blockchain network include peers, orderers, client
-applications, administrators and more. Each of these actors --- active elements
-inside or outside a network able to consume services --- has a digital identity
-encapsulated in an X.509 digital certificate. These identities really matter
-because they **determine the exact permissions over resources and access to
-information that actors have in a blockchain network.**
 
-A digital identity furthermore has some additional attributes that Fabric uses
-to determine permissions, and it gives the union of an identity and the associated
-attributes a special name --- **principal**. Principals are just like userIDs or
-groupIDs, but a little more flexible because they can include a wide range of
-properties of an actor's identity, such as the actor's organization, organizational
-unit, role or even the actor's specific identity. When we talk about principals,
-they are the properties which determine their permissions.
 
-For an identity to be **verifiable**, it must come from a **trusted** authority.
-A [membership service provider](../membership/membership.html)
-(MSP) is how this is achieved in Fabric. More specifically, an MSP is a component
-that defines the rules that govern the valid identities for this organization.
-The default MSP implementation in Fabric uses X.509 certificates as identities,
-adopting a traditional Public Key Infrastructure (PKI) hierarchical model (more
-on PKI later).
+## 身份是什么？
 
-## A Simple Scenario to Explain the Use of an Identity
+区块链网络中的不同角色包括peers、orderers、client applications、administrators等等。
+这些参与者中的每一个（能够使用服务的网络内部或外部的活动元素）都具有封装在X.509数字证书中的数字身份。
+这些身份真的很重要，因为它们**决定了参与者在区块链网络中对资源和信息的访问的确切权限**。
 
-Imagine that you visit a supermarket to buy some groceries. At the checkout you see
-a sign that says that only Visa, Mastercard and AMEX cards are accepted. If you try to
-pay with a different card --- let's call it an "ImagineCard" --- it doesn't matter whether
-the card is authentic and you have sufficient funds in your account. It will be not be
-accepted.
+此外，数字身份（digital identity）还具有一些额外的属性，Fabric使用该属性来确定权限，
+并且它为身份和相关属性的联合提供了特殊的名称--- **principal**。
+principal就像userID或groupID，但是稍微灵活一些，因为它们可以包括参与者身份的各种属性，
+例如参与者的组织、组织单元、角色甚至参与者的特定身份。
+当我们谈论principal时，它们是决定其权限的属性。
+
+身份如果要 **可验证**，它就必须来自**可信的**权威。
+[成员服务提供商](../membership/membership.html) (MSP) 就是Fabric实现这个的机制。
+更具体地说，MSP是定义管理该组织的有效身份的规则的组件。
+结构中的默认MSP实现使用X.509证书作为身份，采用传统的公钥基础设施（PKI）分层模型（稍后在PKI上会作更多阐述）。
+
+## 一个解释身份使用的简单场景
+
+想象一下你去超市买一些杂货。在结帐处你看到一张牌子，上面写着只接受Visa、Mastercard和AMEX。
+如果你尝试用其他的卡付账 --- 我们称之为“想象卡” --- 不管卡是否真实，你的账户里是否有足够的资金。
+它都是不被接受的。
 
 ![Scenario](./identity.diagram.6.png)
 
-*Having a valid credit card is not enough --- it must also be accepted by the store! PKIs
-and MSPs work together in the same way --- a PKI provides a list of identities,
-and an MSP says which of these are members of a given organization that participates in
-the network.*
+*有一个有效的信用卡是不够的，它也必须被商店接受才行！
+PKI和MSP以相同的方式一起工作，PKI提供身份列表，MSP指出这些身份中的哪些是参与网络的特定组织的成员。*
 
-PKI certificate authorities and MSPs provide a similar combination of functionalities.
-A PKI is like a card provider --- it dispenses many different types of verifiable
-identities. An MSP, on the other hand, is like the list of card providers accepted
-by the store, determining which identities are the trusted members (actors)
-of the store payment network. **MSPs turn verifiable identities into the members
-of a blockchain network**.
+PKI证书颁发机构和MSP提供了类似的功能组合。
+PKI就像一个卡提供商，它提供了许多不同类型的可验证的身份。
+另一方面，MSP类似于商店接受的卡提供商列表，确定哪些身份是商店支付网络的可信成员（参与者）。
+**MSP将可验证的身份转换成区块链网络的成员。**
 
-Let's drill into these concepts in a little more detail.
+让我们更详细地钻研这些概念。
 
-## What are PKIs?
+## PKI是干什么的？
 
-**A public key infrastructure (PKI) is a collection of internet technologies that provides
-secure communications in a network.** It's PKI that puts the **S** in **HTTPS** --- and if
-you're reading this documentation on a web browser, you're probably using a PKI to make
-sure it comes from a verified source.
+**公钥基础设施（PKI）是在网络中提供安全通信的互联网技术的集合。**
+是PKI将 **S** 放入了 **HTTPS**，如果您正在Web浏览器上阅读本文档，那么您可能正在使用PKI来确保它来自一个经过验证的源。
 
 ![PKI](./identity.diagram.7.png)
 
-*The elements of Public Key Infrastructure (PKI). A PKI is comprised of Certificate
-Authorities who issue digital certificates to parties (e.g., users of a service, service
-provider), who then use them to authenticate themselves in the messages they exchange
-with their environment. A CA's Certificate Revocation List (CRL) constitutes a reference
-for the certificates that are no longer valid. Revocation of a certificate can happen for
-a number of reasons. For example, a certificate may be revoked because the cryptographic
-private material associated to the certificate has been exposed.*
+*公钥基础设施（PKI）的要素。
+PKI由证书颁发机构组成，证书颁发机构向各方（例如，服务的用户、服务提供者）颁发数字证书，
+然后各方使用证书在与其环境交换的消息中验证自己。
+CA证书吊销列表（CRL）构成不再有效的证书的引用。
+由于许多原因，证书的撤销可能发生。
+例如，证书可能被撤销，因为与证书相关联的加密私有材料已经被公开。*
 
-Although a blockchain network is more than a communications network, it relies on the
-PKI standard to ensure secure communication between various network participants, and to
-ensure that messages posted on the blockchain are properly authenticated.
-It's therefore important to understand the basics of PKI and then why MSPs are
-so important.
+虽然区块链网络不仅仅是一个通信网络，但是它依赖于PKI标准来确保各种网络参与者之间的安全通信，
+并确保发送到在区块链链上的消息被正确地认证。
+因此，了解PKI的基础知识，然后了解MSP为什么如此重要是非常重要的。
 
-There are four key elements to PKI:
+PKI有四个关键要素：
 
- * **Digital Certificates**
- * **Public and Private Keys**
- * **Certificate Authorities**
- * **Certificate Revocation Lists**
+ * **数字证书**
+ * **公钥和私钥**
+ * **证书颁发机构s**
+ * **证书吊销列表**
 
-Let's quickly describe these PKI basics, and if you want to know more details,
-[Wikipedia](https://en.wikipedia.org/wiki/Public_key_infrastructure) is a good
-place to start.
+让我们快速地描述这些PKI基础知识，如果你想知道更多的细节，
+[Wikipedia](https://en.wikipedia.org/wiki/Public_key_infrastructure) 是一个很好的开始。
 
-## Digital Certificates
+## 数字证书
 
-A digital certificate is a document which holds a set of attributes relating to
-the holder of the certificate. The most common type of certificate is the one
-compliant with the [X.509 standard](https://en.wikipedia.org/wiki/X.509), which
-allows the encoding of a party's identifying details in its structure.
+数字证书是一个文档，其包含了与证书持有者相关的一组属性。
+最常见的证书类型是符合 [X.509 standard](https://en.wikipedia.org/wiki/X.509) 标准的证书，
+该标准允许对当事人身份细节进行结构化的编码。
 
-For example, Mary Morris in the Manufacturing Division of Mitchell Cars in Detroit,
-Michigan might have a digital certificate with a `SUBJECT` attribute of `C=US`,
-`ST=Michigan`, `L=Detroit`, `O=Mitchell Cars`, `OU=Manufacturing`, `CN=Mary Morris /UID=123456`.
-Mary's certificate is similar to her government identity card --- it provides
-information about Mary which she can use to prove key facts about her. There are
-many other attributes in an X.509 certificate, but let's concentrate on just these
-for now.
+例如，密歇根州 底特律 米歇尔汽车制造部 的玛丽·莫里斯可能有一个 `SUBJECT` 属性为
+`C=US`,`ST=Michigan`, `L=Detroit`, `O=Mitchell Cars`, `OU=Manufacturing`, `CN=Mary Morris /UID=123456` 
+的数字证书。
+玛丽的证书与她的政府身份证相似，它提供了关于玛丽的信息，她可以用来证明关于她的重要事实。
+X.509证书中还有很多其他属性，但现在我们只关注上面提到的这些。
 
 ![DigitalCertificate](./identity.diagram.8.png)
 
-*A digital certificate describing a party called Mary Morris. Mary is the `SUBJECT` of the
-certificate, and the highlighted `SUBJECT` text shows key facts about Mary. The
-certificate also holds many more pieces of information, as you can see. Most importantly,
-Mary's public key is distributed within her certificate, whereas her private signing key
-is not. This signing key must be kept private.*
+*一个描述叫做Mary Morris的身份的数字证书。玛丽是证书的 `SUBJECT` ，
+突出的 `SUBJECT` 文本显示了关于玛丽的关键事实。
+如您所见，该证书还保存了更多的信息。
+最重要的是，玛丽的公钥是在她的证书中分发的，而她的私有签名密钥不是。
+这个签名密钥必须保密。*
 
-What is important is that all of Mary's attributes can be recorded using a mathematical
-technique called cryptography (literally, "*secret writing*") so that tampering will
-invalidate the certificate. Cryptography allows Mary to present her certificate to others
-to prove her identity so long as the other party trusts the certificate issuer, known
-as a **Certificate Authority** (CA). As long as the CA keeps certain cryptographic
-information securely (meaning, its own **private signing key**), anyone reading the
-certificate can be sure that the information about Mary has not been tampered with ---
-it will always have those particular attributes for Mary Morris. Think of Mary's X.509
-certificate as a digital identity card that is impossible to change.
+重要的是，可以使用称为加密（cryptography：字面意思是“*秘密写入*”）的数学技术记录Mary的所有属性，以便防止篡改行为造成证书失效。
+只要对方信任证书颁发者（称为**证书颁发机构**（CA）），加密允许Mary向其他人提交证书以证明她的身份。
+只要CA安全地保存某些加密信息（即它自己的**私有签名密钥**），任何阅读证书的人都可以确保关于Mary的信息没有被篡。
+对于Mary Morris，它总是具有那些特定的属性。可以把玛丽的X.509证书看作是不可能改变的数字身份证。
 
-## Authentication, Public keys, and Private Keys
+## 身份验证、公钥和私钥
 
-Authentication and message integrity are important concepts in secure
-communications. Authentication requires that parties who exchange messages
-are assured of the identity that created a specific message. For a message to have
-"integrity" means that cannot have been modified during its transmission.
-For example, you might want to be sure you're communicating with the real Mary
-Morris rather than an impersonator. Or if Mary has sent you a message, you might want
-to be sure that it hasn't been tampered with by anyone else during transmission.
+认证和消息完整性是安全通信中的重要概念。
+身份验证要求，交换消息的各方保证有创建特定消息的身份。
+对于具有“完整性”的消息，意味着在传输过程中不能修改。
+例如，您可能希望确保与真实的Mary Morris通信，而不是冒充者。
+或者，如果Mary已经向您发送了消息，您可能希望确保在传输过程中没有其他人篡改它。
 
-Traditional authentication mechanisms rely on **digital signatures** that,
-as the name suggests, allow a party to digitally **sign** its messages. Digital
-signatures also provide guarantees on the integrity of the signed message.
+传统的认证机制依赖于**数字签名（digital signatures）**，顾名思义，数字签名允许一方对其消息进行数字化的**签名**。
+数字签名还提供了签名消息完整性的保证。
 
-Technically speaking, digital signature mechanisms require each party to
-hold two cryptographically connected keys: a public key that is made widely available
-and acts as authentication anchor, and a private key that is used to produce
-**digital signatures** on messages. Recipients of digitally signed messages can verify
-the origin and integrity of a received message by checking that the
-attached signature is valid under the public key of the expected sender.
+从技术上讲，数字签名机制要求每一方持有两个加密连接的密钥：一个公钥，它被广泛使用并作为认证锚；
+还有一个私钥，用于在消息上生成**数字签名**。
+数字签名消息的接收者，可以通过检查所附的名在预期发送者的公钥下是否有效，从而来验证所接收消息的来源和完整性。
 
-**The unique relationship between a private key and the respective public key is the
-cryptographic magic that makes secure communications possible**. The unique
-mathematical relationship between the keys is such that the private key can be used to
-produce a signature on a message that only the corresponding public key can match, and
-only on the same message.
+**私钥与各自的公钥之间的独特关系是使安全通信成为可能的密码魔法。**
+密钥之间的唯一数学关系，使得私钥可以用于在只有相应的公钥可以匹配的消息上生成签名，并且仅在相同的消息上生成签名。
 
 ![AuthenticationKeys](./identity.diagram.9.png)
 
-In the example above, Mary uses her private key to sign the message. The signature
-can be verified by anyone who sees the signed message using her public key.
+在上面的示例中，玛丽使用她的私钥来签署消息。任何看到消息的人，都可以使用她的公钥对签名进行验证。
 
-## Certificate Authorities
+证书颁发机构将证书分发给不同的参与者。这些证书由CA进行数字签名，并将参与者与参与者的公钥（可选地还有一个全面的属性列表）绑定在一起。因此，如果信任CA（并且知道其公钥），则通过验证参与者证书上的CA签名，可以信任特定参与者绑定到证书中包括的公钥，并拥有所包括的属性。证书可以广泛传播，因为它们既不包括演员也不包括CA的私钥。因此，它们可以用作信任来自不同行动者的消息的信任锚。CAs也有证书，他们广泛使用。这允许给定CA颁发的身份的消费者通过检查证书是否只能由相应的私钥（CA）的持有者生成，来验证它们。在块链设置中，希望与网络交互的每个演员都需要身份。在此设置中，您可能会说，可以使用一个或多个CA从数字角度定义组织的成员。正是CA为一个组织的参与者提供了一个可验证的数字身份的基础。
 
-As you've seen, an actor or a node is able to participate in the blockchain network,
-via the means of a **digital identity** issued for it by an authority trusted by the
-system. In the most common case, digital identities (or simply **identities**) have
-the form of cryptographically validated digital certificates that comply with X.509
-standard and are issued by a Certificate Authority (CA).
+## 证书颁发机构
 
-CAs are a common part of internet security protocols, and you've probably heard of
-some of the more popular ones: Symantec (originally Verisign), GeoTrust, DigiCert,
-GoDaddy, and Comodo, among others.
+如您所见，参与者或节点能够通过系统信任的权威机构为其发布的**数字身份**，来参与块链网络。
+在最常见的情况下，数字身份（或简称，**身份**）具有符合X.509标准的加密验证的数字证书的形式，并且由证书颁发机构（CA）颁发。
+
+CA是互联网安全协议的一个常见部分，您可能已经听说过一些比较流行的协议：
+赛门铁克（最初是Verisign）、GeoTrust、DigiCert、GoDaddy和Comodo等等。
 
 ![CertificateAuthorities](./identity.diagram.11.png)
 
-*A Certificate Authority dispenses certificates to different actors. These certificates
-are digitally signed by the CA and bind together the actor with the actor's public key
-(and optionally with a comprehensive list of properties). As a result, if one trusts
-the CA (and knows its public key), it can trust that the specific actor is bound
-to the public key included in the certificate, and owns the included attributes,
-by validating the CA's signature on the actor's certificate.*
+*证书颁发机构将证书分发给不同的参与者。这些证书由CA进行数字签名，并将参与者与参与者的公钥（可选地还有一个全面的属性列表）绑定在一起。
+因此，如果信任CA（并且知道其公钥），通过验证行动者证书上的CA签名，就可以相信：特定参与者绑定了证书中包括的公钥，并拥有所包括的属性。*
 
-Certificates can be widely disseminated, as they do not include either the
-actors' nor the CA's private keys. As such they can be used as anchor of
-trusts for authenticating messages coming from different actors.
+证书可以广泛传播，因为它们既不包括行动者也不包括CA的私钥。
+因此，它们可以作为一个信任锚点，从而信任来自不同行动者的消息。
 
-CAs also have a certificate, which they make widely available. This allows the
-consumers of identities issued by a given CA to verify them by checking that the
-certificate could only have been generated by the holder of the corresponding
-private key (the CA).
+CA也有证书，他们广泛使用。
+这允许参与者在验证特定CA颁发的身份时，可以通过检查证书是否只能由相应的私钥（CA）的持有者生成，从而达成验证。
 
-In a blockchain setting, every actor who wishes to interact with the network
-needs an identity. In this setting, you might say that **one or more CAs** can be used
-to **define the members of an organization's from a digital perspective**. It's
-the CA that provides the basis for an organization's actors to have a verifiable
-digital identity.
+在区块链设置中，希望与网络交互的每个行动者都需要身份。
+在此设置中，您可能会说，可以使用 **一个或多个CA** 来 **从数字角度定义组织的成员**。
+正是CA为一个组织的参与者提供了一个可验证的数字身份的基础。
 
-### Root CAs, Intermediate CAs and Chains of Trust
+### 根CA、中间CAs和信任链
 
-CAs come in two flavors: **Root CAs** and **Intermediate CAs**. Because Root CAs
-(Symantec, Geotrust, etc) have to **securely distribute** hundreds of millions
-of certificates to internet users, it makes sense to spread this process out
-across what are called *Intermediate CAs*. These Intermediate CAs have their
-certificates issued by the root CA or another intermediate authority, allowing
-the establishment of a "chain of trust" for any certificate that is issued by
-any CA in the chain. This ability to track back to the Root CA not only allows
-the function of CAs to scale while still providing security --- allowing
-organizations that consume certificates to use Intermediate CAs with confidence
---- it limits the exposure of the Root CA, which, if compromised, would endanger
-the entire chain of trust. If an Intermediate CA is compromised, on the other
-hand, there will be a much smaller exposure.
+CA有两种形式：**根CA** 和 **中间CA**。
+因为根CA（Symantec、Geotrust等）必须**安全地**向互联网用户分发数以亿计的证书，所以将这个过程扩展到所谓的中间CA是有意义的。
+这些 **中间CA** 具有由根CA或其他中间机构颁发的证书，允许为链中的任何CA颁发的任何证书建立“信任链”。
+追溯到根CA的这种能力不仅允许CA的功能进行扩展，同时仍然提供安全性（允许使用证书的组织有信心地使用中间CA）还限制了根CA的暴露，
+如果根CA受到损害，这将危及到整个信任链。另一方面，如果只是中间CA被破坏，将有一个稍小的曝光。
 
 ![ChainOfTrust](./identity.diagram.1.png)
 
-*A chain of trust is established between a Root CA and a set of Intermediate CAs
-as long as the issuing CA for the certificate of each of these Intermediate CAs is
-either the Root CA itself or has a chain of trust to the Root CA.*
+*在根CA和一组中间CA之间建立信任链，只要满足这样的条件，即：
+每个为这些中间CA颁发证书的CA，都是根CA本身或者具有对根CA的信任链。*
 
-Intermediate CAs provide a huge amount of flexibility when it comes to the issuance
-of certificates across multiple organizations, and that's very helpful in a
-permissioned blockchain system (like Fabric). For example, you'll see that
-different organizations may use different Root CAs, or the same Root CA with
-different Intermediate CAs --- it really does depend on the needs of the network.
+中间CA在跨多个组织颁发证书时提供了大量的灵活性，这对于允许的区块链系统（如Fabric）非常有帮助。
+例如，您将看到不同的组织可以使用不同的根CA，或者使用具有不同中间CA的相同根CA——这确实取决于网络的需要。
 
 ### Fabric CA
 
-It's because CAs are so important that Fabric provides a built-in CA component to
-allow you to create CAs in the blockchain networks you form. This component --- known
-as **Fabric CA** is a private root CA provider capable of managing digital identities of
-Fabric participants that have the form of X.509 certificates.
-Because Fabric CA is a custom CA targeting the Root CA needs of Fabric,
-it is inherently not capable of providing SSL certificates for general/automatic use
-in browsers. However, because **some** CA must be used to manage identity
-(even in a test environment), Fabric CA can be used to provide and manage
-certificates. It is also possible --- and fully appropriate --- to use a
-public/commerical root or intermediate CA to provide identification.
+正是因为CA非常重要，所以Fabric提供了一个内置的CA组件，允许您在您所创建的区块链网络中创建CA。
+这个称为 **Fabric CA** 的组件是一个私有根CA提供者，能够管理具有X.509证书形式的Fabric参与者的数字身份。
+因为Fabric CA是针对Fabric的根CA需求的定制CA，所以它固有地不能为浏览器中的 通用/自动 使用提供SSL证书。
+然而，因为必须使用 **一些** CA来管理身份（即使在测试环境中），所以可以使用Fabric CA来提供和管理证书。
+使用公共/商业根或中间CA来提供身份证明也是可能的，也是完全合适的。
 
-If you're interested, you can read a lot more about Fabric CA
-[in the CA documentation section](http://hyperledger-fabric-ca.readthedocs.io/).
+如果你感兴趣，你可以在
+[in the CA documentation section](http://hyperledger-fabric-ca.readthedocs.io/)
+部分阅读更多关于Fabric CA的内容。
 
-## Certificate Revocation Lists
+## 证书吊销列表
 
-A Certificate Revocation List (CRL) is easy to understand --- it's just a list of
-references to certificates that a CA knows to be revoked for one reason or another.
-If you recall the store scenario, a CRL would be like a list of stolen credit cards.
+证书吊销列表（Certificate Revocation List，CRL）很容易理解，它只是CA知道的，由于某种原因而被撤销的证书的引用列表。
+如果你回忆起商店的例子，CRL就像是被盗信用卡的列表。
 
-When a third party wants to verify another party's identity, it first checks the
-issuing CA's CRL to make sure that the certificate has not been revoked. A
-verifier doesn't have to check the CRL, but if they don't they run the risk of
-accepting a compromised identity.
+当第三方想要验证另一方的身份时，它首先检查发行的CA的CRL，以确保证书没有被撤销。
+验证者不必非得检查CRL，但如果他们不检查，则要承担受损身份的风险。
 
 ![CRL](./identity.diagram.12.png)
 
-*Using a CRL to check that a certificate is still valid. If an impersonator tries to
-pass a compromised digital certificate to a validating party, it can be first
-checked against the issuing CA's CRL to make sure it's not listed as no longer valid.*
+*使用CRL检查证书是否仍然有效。
+如果模拟器试图将受损的数字证书传递给验证方，那么可以首先根据发行的CA的CRL对其进行检查，以确保它不再被列为无效的。*
 
-Note that a certificate being revoked is very different from a certificate expiring.
-Revoked certificates have not expired --- they are, by every other measure, a fully
-valid certificate. For more in-depth information about CRLs, click [here](https://hyperledger-fabric-ca.readthedocs.io/en/latest/users-guide.html#generating-a-crl-certificate-revocation-list).
+请注意，吊销证书与证书过期非常不同。吊销证书没有过期，它们是有效的证书。
+有关CRLs的更深入的信息，请点击[这里](https://hyperledger-fabric-ca.readthedocs.io/en/latest/users-guide.html#generating-a-crl-certificate-revocation-list).
 
-Now that you've seen how a PKI can provide verifiable identities through a chain of
-trust, the next step is to see how these identities can be used to represent the
-trusted members of a blockchain network. That's where a Membership Service Provider
-(MSP) comes into play --- **it identifies the parties who are the members of a
-given organization in the blockchain network**.
+现在，您已经看到PKI如何通过信任链提供可验证的身份了，下一步是看这些身份如何被用来表示区块链网络的可信成员。
+这就是会员服务提供商（MSP）发挥作用的地方，**它表明了区块链网络中给定组织成员的当事人身份**。
 
-To learn more about membership, check out the conceptual documentation on [MSPs](../membership/membership.html).
+要了解有关成员资格的更多信息，请查看关于[MSP](../membership/membership.html)的概念文档。
 
 <!---
 Licensed under Creative Commons Attribution 4.0 International License https://creativecommons.org/licenses/by/4.0/
