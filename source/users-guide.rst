@@ -1097,34 +1097,33 @@ CSR字段来描述字段。
 注册命令在Fabric CA客户端的 ``msp`` 目录的子目录中存储注册证书（ECert）、相应的私钥和CA证书链PEM文件。
 您将看到指示存储PEM文件的位置的消息。
 
-注册（register）一个新的身份
+登记（register）一个新的身份
 ~~~~~~~~
 
-执行注册请求的身份必须当场（currently）注册，并且还必须具有注册正在注册的身份类型的适当权限。
+只有已经注册的用户才能发起登记请求，并且还必须具有登记正登记的身份类型的相应权限。
 
-特别地，在注册期间，由Fabric CA服务器进行的三个授权检查如下：
+特别地，Fabric CA服务器会在注册期间进行如下三个授权检查：
 
-1. 注册者（Registrar，即调用者：invoker）必须有"hf.registrar.roles"，其值为逗号分割的列表，列表其一就是注册着调用的身份角色。
-   比如说，如果注册者的"hf.Registrar.Roles"有值"peer,app,user"，注册者可以注册的身份就有
+1. 登记员（Registrar，即调用者：invoker）必须有"hf.registrar.roles"，其值为逗号分割的列表，列表其一就是登记员调用的身份角色。
+   比如说，如果注册者的"hf.Registrar.Roles"有值"peer,app,user"，注册者可以登记的身份就有
    peer，app和user，但是没有orderer。
 
-2. 注册者的归属关系必须等于或是注册身份归属关系的前缀。
-   例如，具有“a.b”归属关系的注册官可以在“a.b.c”归属关系注册身份，但不可以在“a.c”归属关系注册身份。
-   如果标识需要根关联，那么关联请求应该是点（“.”），注册者也必须具有根关联。
-   如果在注册请求中没有指定归属关系，则正在注册的身份将被给予注册者的从属关系。
+2. 登记员只能登记自己归属范围内的归属。
+   例如，具有“a.b”归属的登记员，可以登记“a.b.c”归属身份，但不可以在“a.c”归属关系注册身份。
+   如果标识需要根关联，那么关联请求应该是点（“.”），同时登记员也必须具有根关联。
+   如果在注册请求中没有指定归属，那么默认就和登记员的归属一样。
 
-3. 如果满足以下所有条件，则注册者可以向用户注册属性：
+3. 登记的用户属性需要满足如下些条件：
 
-   - 只有当注册者拥有该属性并且它是 'hf.Registrar.Attributes' 属性值的一部分时，Registrar才能注册具有前缀'hf.'的Fabric CA保留属性。
-     此外，如果属性是类型列表，那么正在注册的属性的值必须等于或为注册者所拥有的值的子集。
-     如果属性是布尔类型，则注册器只能在注册者对于属性的值是“true”时才能注册该属性。
-   - 注册自定义属性（即，名称不以“hf.”开头的任何属性）要求注册器具有“hf.Registar.Attributes”属性，该属性或模式的值正在注册。
-     唯一支持的模式是一个结尾为“*”的字符串。例如，“A.B.*”是一个与“A.B”开头的所有属性名称相匹配的模式。
+   - 只有当登记员拥有某属性并且它是 'hf.Registrar.Attributes' 属性值的一部分时，登记员才能注册具有前缀'hf.'的Fabric CA保留属性。
+     此外，如果属性是类型列表，那么正在登记的属性的值必须包含在登记员所拥有的值范围内。
+     如果属性是布尔类型，则登记员只能在其该属性的值是“true”时才能登记该属性。
+   - 登记的用户属性需要包含在登记员的用户属性“hf.Registar.Attributes”中。
+     目前只支持结尾为“*”的通配符。例如，“A.B.*”与“A.B”开头的所有属性名称相匹配。
      例如，如果注册器具有hf.Registrar.Attributes=orgAdmin，则注册器可以从标识中添加或删除的唯一属性是“orgAdmin”属性。
-   - 如果所请求的属性名是“hf.Registrar.Attributes”，则执行附加检查，以查看此属性的请求值是否等于注册器的“hf.Registrar.Attributes”值的子集。
-     为了做到这一点，每个请求的值必须与注册中心的“hf.Registrar.Attributes”属性的值匹配。
-     例如，如果注册器的“hf.Registrar.Attributes”的值是“a.b.*，x.y.z”，并且请求的属性值是“a.b.c，x.y.z”，则它是有效的，
-     因为“a.b.c”匹配“a.b.*”，而“x.y.z”匹配注册器的“x.y.z”值。
+   - 如果所请求的属性名是“hf.Registrar.Attributes”，则需要查看此属性的请求值是否是登记员的该属性值的子集。
+     例如，如果登记员的“hf.Registrar.Attributes”的值是“a.b.*，x.y.z”，而请求的属性值是“a.b.c，x.y.z”，则它是有效的，
+     因为“a.b.c”匹配“a.b.*”，而同时具有相同的属性"x.y.z"。
 
 Examples:
    Valid Scenarios:
@@ -1164,7 +1163,7 @@ Examples:
 下表列出了可以为身份注册的所有属性。属性的名称是区分大小写的。
 
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
-| 名称                         | 类型        | 描述                                                                                                |
+| Name                        | Type       | Description                                                                                                |
 +=============================+============+============================================================================================================+
 | hf.Registrar.Roles          | List       | List of roles that the registrar is allowed to manage                                                      |
 +-----------------------------+------------+------------------------------------------------------------------------------------------------------------+
@@ -1184,19 +1183,19 @@ Examples:
 .. note:: 当注册身份时，指定属性名称和值的数组。如果数组指定具有多个相同名称的数组元素，则当前只使用最后一个元素。
           换句话说，当前不支持多值属性。
 
-下面的命令使用 **admin** 身份的凭证向新用户注册一个新的user，其注册ID为“admin2”、
-归属关系为“org1.department1”、属性“hf.Revoker”的值为“true”，属性“admin”值为“true”。
-":ecert" 后缀意味着默认情况下，“admin”属性及其值将被插入用户的注册证书中，然后该证书可用于作出访问控制决策。
+下面的命令中，登记员是 **admin**，登记的新用户的登记ID为“admin2”、
+affiliation为“org1.department1”、属性“hf.Revoker”的值为“true”，属性“admin”值为“true”。
+":ecert" 后缀意味着默认情况下，“admin”属性及其值将被添加到用户的注册证书中，从而实现访问控制。
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name admin2 --id.affiliation org1.department1 --id.attrs 'hf.Revoker=true,admin=true:ecert'
 
-密码，也称为登记秘密（enrollment secret）被打印出来。
-此密码是enroll身份所必需的。这允许管理员注册身份，并将enrollment ID和秘密交给其他人来注册身份。
+命令运行后，会打印出密码，也称为注册密码。
+此密码是enroll身份所必需的。这允许管理员注册身份，并将enrollment ID和密码交给其他人来注册身份。
 
-可以将多个属性指定为 --id.attrs 标志的一部分，每个属性必须逗号分隔。
+在登记用户的时候，可以使用 --id.attrs 标识来同时指定多个属性，属性之间用逗号分割。
 对于包含逗号的属性值，属性必须封装在双引号中。见下面的例子。
 
 .. code:: bash
@@ -1209,7 +1208,8 @@ Examples:
 
     fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,user"' --id.attrs hf.Revoker=true
 
-通过编辑客户端的配置文件，可以为注册命令中使用的任何字段设置默认值。例如，假设配置文件包含以下内容：
+通过编辑客户端的配置文件，可以为注册命令中使用的任何字段设置默认值。
+例如，假设配置文件包含以下内容：
 
 .. code:: yaml
 
@@ -1268,10 +1268,10 @@ Examples:
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
     fabric-ca-client register --id.name client1 --id.type client --id.affiliation bu1.department1.Team1
 
-登记（enroll）一个peer身份
+注册（enroll）一个peer身份
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-既然您已经成功登记（register）了peer身份，那么现在您可以用给定的注册ID和密码（即来自前一部分的 *密码* ）来注册peer。
+既然您已经成功登记（register）了peer身份，那么现在您可以用给定的注册ID和密码（即来自前一部分的 *密码* ）来注册peer了。
 这与注册引导身份类似，除了我们还演示了如何使用“-M”选项来填充Hyperledger Fabric MSP（成员服务提供商）目录结构。
 
 下面的命令注册peer1。确保将“-M”选项的值替换为你peer的MSP目录的路径，
@@ -1324,14 +1324,14 @@ Fabric CA客户端将适当地处理两种顺序。
 重新注册身份
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-假设你的入学证书即将到期。您可以发布 reenroll 命令来更新您的注册证书，就像下面这样操作：
+假设你的注册证书即将到期。您可以发布 reenroll 命令来更新您的注册证书，就像下面这样：
 
 .. code:: bash
 
     export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
     fabric-ca-client reenroll
 
-吊销证书或身份
+注销证书或身份
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 可以取消身份或证书。撤销身份将撤销该身份所拥有的所有证书，并且还将阻止该身份获得任何新证书。
@@ -1344,7 +1344,7 @@ Fabric CA客户端将适当地处理两种顺序。
 可以撤销与　**orgs.org1**  或 **orgs.org1.department1** 相关联的 **peer** 或 **client** 类型身份，
 但不能撤销与 **orgs.org2**  或任何其他类型相关联的标识。下
 
-面的命令禁用身份并撤销与该身份相关联的所有证书。
+下面的命令禁用了一个身份，并撤销与该身份相关联的所有证书。
 所有Fabric CA服务器接收到的来自该身份的请求都将被拒绝。
 
 .. code:: bash
@@ -1462,9 +1462,9 @@ gencrl命令还将接受 `--expireafter` 和 `--expirebefore` 标记，
         keyfile: tls_client-key.pem
 
 **certfiles** 选项是客户端信任的根证书的集合。
-这通常就是服务器home目录中找到的根Fabric CA服务器证书，即**ca-cert.pem**文件。
+这通常就是服务器home目录中找到的根Fabric CA服务器证书，即 **ca-cert.pem** 文件。
 
-只有在服务器上配置mutual TLS时才需要 **client** 选项。
+只有在服务器上配置双向认证（mutual TLS）时才需要 **client** 选项。
 
 基于属性的访问控制
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1600,13 +1600,13 @@ The following shows how to add, modify, and remove an affiliation.
 下表列出了身份的所有字段，以及它们是必需的还是可选的，以及它们可能具有的任何默认值。
 
 +----------------+------------+------------------------+
-| 字段            | 必须        | 默认值                  |
+| Fields         | Required   | Default Value          |
 +================+============+========================+
 | ID             | Yes        |                        |
 +----------------+------------+------------------------+
 | Secret         | No         |                        |
 +----------------+------------+------------------------+
-| Affiliation    | No         | 调用者的 Affiliation     |
+| Affiliation    | No         | Caller's Affiliation   |
 +----------------+------------+------------------------+
 | Type           | No         | client                 |
 +----------------+------------+------------------------+
