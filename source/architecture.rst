@@ -6,7 +6,7 @@
 
    arch-deep-dive
    txflow
-   Hyperledger Fabric CA's User Guide <http://hyperledger-fabric-ca.readthedocs.io/en/latest>
+   users-guide
    fabric-sdks
    discovery-overview
    channels
