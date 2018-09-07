@@ -50,7 +50,7 @@ Hyperledger Fabric的动机来自这两个相同的关注点——呈现一组�
 
 ![ledger.worldstate](./ledger.diagram.3.png)
 
-*上面看到的东西表述的事情如下：*有一个 key＝CAR1和 value＝Audi 的分类帐状态。
+*上面看到的东西表述的事情如下：有一个 key＝CAR1和 value＝Audi 的分类帐状态。
 有一个具有 key＝CAR2 的分类帐状态，它和一个更复杂的值{model:BMW, color=red, owner=Jane}。两个状态都在版本0。*
 
 分类帐状态被用来记录通过区块链共享的应用程序信息。上面的例子显示了两辆车CAR1和CAR2的分类帐状态。
@@ -76,229 +76,160 @@ Hyperledger Fabric的动机来自这两个相同的关注点——呈现一组�
 这可以非常方便——例如，当创建peer时，自动生成世界状态。
 此外，如果peer异常失败，peer重启时可以在接受交易之前重新生成世界状态。
 
-## Blockchain
+## 区块链
 
-Let's now turn our attention from the ledger world state to the ledger
-blockchain.
+现在让我们把注意力从账本世界状态转移到账本区块链。
 
-The blockchain is a transaction log, structured as interlinked blocks, where
-each block contains a sequence of transactions, each of which represents a query
-or update to the world state. The exact mechanism by which transactions are
-ordered is discussed [elsewhere](../peers/peers.html#peers-and-orderers) --
-what's important is that block sequencing, as well as transaction sequencing
-within blocks, is established when blocks are first created.
+区块链是一个交易日志，结构为相互链接的块，其中每个块包含一系列交易，每个交易表示对世界状态的查询或更新。
+交易排序的确切机制在 [其他地方](../peers/peers.html#peers-and-orderers) 讨论,
+重要的是，区块排序以及区块内的交易排序是在区块首次创建时建立的。
 
-Each block's header includes a hash of the block's transactions, as well a copy
-of the hash of the prior block's header. In this way, all transactions on the
-ledger are sequenced and cryptographically linked together. This hashing and
-linking makes the ledger data very secure. Even if one node hosting the ledger
-was tampered with, it would not be able to convince all the other nodes that it
-has the 'correct' blockchain because the ledger is distributed throughout a
-network of independent nodes.
+每个块的头包括区块交易的散列值，以及先前块头部的散列的副本。
+通过这种方式，分类帐上的所有事务都被排序并加密地链接在一起。
+这种散列和链接使得分类帐数据非常安全。
+即使承载分类账的一个节点被篡改，它也不能说服所有其他节点它拥有“正确”的区块链，因为分类账分布在独立节点的网络中。
 
-Physically, the blockchain is always implemented as a file, in contrast to the
-world state, which uses a database. This is a sensible design choice as the
-blockchain data structure is heavily biased towards a very small set of simple
-operations. Appending to the end of the blockchain is the primary operation, and
-query is currently a relatively infrequent operation.
+物理上，区块链总是作为文件实现，与使用数据库的世界状态相反。
+这是一个明智的设计选择，因为区块链数据结构严重偏向于非常小的一组简单操作。
+附加到区块链的末尾是主操作，查询是当前相对不常见的操作。
 
-Let's have a look at the structure of a blockchain in a little more detail.
+让我们更详细地看一下区块链的结构。
 
 ![ledger.blockchain](./ledger.diagram.2.png)
 
-*The visual vocabulary expressed in facts is as follows: Blockchain B
-contains blocks B0, B1, B2, B3. B0 is the first block in the blockchain, the
-genesis block*
+*上面看到的东西表述的事情如下：区块链包含块B0、B1、B2、B3。B0是区块链中的第一个块，即创世区块*
 
-In the above diagram, we can see that **block** B2 has a **block data** D2 which
-contains all its transactions: T5, T6, T7.
+在上面的图中，我们可以看到块B2有块数据D2，它包含所有的交易：T5、T6、T7。
 
-Most importantly, B2 has a **block header** H2, which contains a cryptographic
-**hash** of all the transactions in D2 as well as with the equivalent hash from
-the previous block B1. In this way, blocks are inextricably and immutably linked
-to each other, which the term **blockchain** so neatly captures!
+最重要的是，B2有一个**区块头**H2，它包含D2中所有交易的密码**散列**以及前一块B1的等效散列。
+以这种方式，区是不可分割的和不可变地相互连接，这样是不是一下子就说明了术语**区块链**！
 
-Finally, as you can see in the diagram, the first block in the blockchain is
-called the **genesis block**.  It's the starting point for the ledger, though it
-does not contain any user transactions. Instead, it contains a configuration
-transaction containing the initial state of the network channel (not shown). We
-discuss the genesis block in more detail when we discuss the blockchain network
-and [channels](../channels.html) in the documentation.
+最后，如图中所示，区块链中的第一个块称为**创世区块**。
+这是分类账的起点，虽然它不包含任何用户交易。
+相反，它包含一个包含网络通道初始状态的配置交易（未示出）。
+当我们讨论文档链中的区块链网络和[通道](../channels.html)时，我们会更详细地讨论创世区块。
 
-## Blocks
+## 区块
 
-Let's have a closer look at the structure of a block. It consists of three
-sections
+让我们仔细看看一个区块的结构。它由三个部分组成。
 
-* **Block Header**
+* **区块头**
 
-  This section comprises three fields, written when a block is created.
+  本部分包括三个字段，在创建块时编写。
 
-  * **Block number**: An integer starting at 0 (the genesis block), and
-  increased by 1 for every new block appended to the blockchain.
+  * **区块编号**: 区块编号：从0开始的整数（创世区块），每个新块添加到区块链上时，计数会增加1。
 
-  * **Current Block Hash**: The hash of all the transactions contained in the
-  current block.
+  * **当前区块哈希**: 当前块中包含的所有交易的哈希。
 
-  * **Previous Block Hash**: A copy of the hash from the previous block in the
-  blockchain.
+  * **前块哈希**: 块链中前一个块的散列的副本。
 
   ![ledger.blocks](./ledger.diagram.4.png)
 
-  *The visual vocabulary expressed in facts is as follows: Block header H2 of
-  block B2 consists of block number 2, the hash CH2 of the current block data
-  D2, and a copy of a hash PH1 from the previous block, block number 1.*
+  *上面看到的东西表述的事情如下：区块B2的块头H2由区块号2、当前块数据D2的散列CH2和来自前一块的散列PH1的副本（块号1）组成。*
 
 
-* **Block Data**
+* **区块数据**
 
-  This section contains a list of transactions arranged in order. It is
-  written when the block is created. These transactions have a rich but
-  straightforward structure, which we describe [later](#Transactions) in this
-  topic.
+  本节包含按顺序排列的交易列表。它是在创建块时编写的。
+  这些交易具有丰富但简单的结构，我们将在本主题[后面](#Transactions)描述。
 
+* **区块元数据**
 
-* **Block Metadata**
+  本节包含写入块的时间，以及区块写入器的证书、公钥和签名。
+  随后，区块提交器还为每个交易添加一个有效/无效的指示符，尽管这个信息不包括在哈希中，就像创建区块时创建的那样。
 
-  This section contains the time when the block was written, as well as the
-  certificate, public key and signature of the block writer. Subsequently, the
-  block committer also adds a valid/invalid indicator for every transaction,
-  though this information is not included in the hash, as that is created when
-  the block is created.
+## 交易
 
-## Transactions
-
-As we've seen, a transaction captures changes to the world state. Let's have a
-look at the detailed **blockdata** structure which contains the transactions in
-a block.
+正如我们所看到的，交易捕捉到世界状态的变化。
+让我们来看看包含区块中交易的详细**区块数据**结构。
 
 ![ledger.transaction](./ledger.diagram.5.png)
 
-*The visual vocabulary expressed in facts is as follows: Transaction T4 in
-blockdata D1 of block B1 consists of transaction header, H4, a transaction
-signature, S4, a transaction proposal P4, a transaction response, R4, and a list
-of endorsements, E4.*
 
-In the above example, we can see the following fields:
+*上图表示内容如下: 区块B1的块数据D1中的交易T4由交易头H4、交易签名S4、交易提案P4、交易响应R4和背书列表E4组成。*
 
+在上面的示例中，我们可以看到以下字段：
 
-* **Header**
+* **头部**
 
-  This section, illustrated by H4, captures some essential metadata about the
-  transaction -- for example, the name of the relevant chaincode, and its
-  version.
+  本节由H4表示，它捕获有关交易的一些基本元数据，例如，相关链码的名称及其版本。
 
+* **签名**
 
-* **Signature**
+  本节由S4表示，包含由客户端应用程序创建的加密签名。
+  这个字段用于检查交易细节是否被篡改，因为它需要应用程序的私钥来生成它。
 
-  This section, illustrated by S4, contains a cryptographic signature, created by
-  the client application. This field is used to check that the transaction
-  details have not been tampered with, as it requires the application's private
-  key to generate it.
+* **提案**
 
+  这个字段由P4表示，它编码应用程序提供给链码的输入参数，链码创建了提案的分类账更新。
+  当链码运行时，该提案提供了一组输入参数，这些参数与当前世界状态结合起来确定新的世界状态。
 
-* **Proposal**
+* **响应**
 
-  This field, illustrated by P4, encodes the input parameters supplied by an
-  application to the chaincode which creates the proposed ledger update. When
-  the chaincode runs, this proposal provides a set of input parameters, which,
-  in combination with the current world state, determines the new world state.
+  这一部分由R4表示，作为一个**读写集**（RW集）捕获世界状态的前后值。
+  它是链码的输出，如果交易被成功验证，它将应用于分类账以更新世界状态。
+  
+* **背书**
 
+  如E4所示，这是来自每个所需组织的签名交易响应的列表，其足以满足背书策略。
+  您会注意到，虽然只有一个交易响应包含在事务中，但是会有多个背书。
+  这是因为每个背书有效地编码了其组织的特定交易响应，
+  这意味着不需要包含这样的交易响应：其与足够的背书不匹配，因为它将被拒绝为无效，并且不更新世界状态。
+  
+这结束了交易的主要领域——还有其他领域，但是这些是您需要理解的基本领域，以便对分类账数据结构有坚实的理解。
 
-* **Response**
+## 世界状态数据库选项
 
-  This section, illustrated by R4, captures the before and after values of the
-  world state, as a **Read Write set** (RW-set). It's the output of a chaincode,
-  and if the transaction is successfully validated, it will be applied to the
-  ledger to update the world state.
+世界状态被物理地实现为数据库，以提供简单有效的存储和检索账本状态。
+正如我们所看到的，分类账状态可以具有简单或复杂的值，为了适应这一点，世界状态数据库实现可以变化，从而允许有效地实现这些值。
+当前状态数据库的选项包括LevelDBB和CouCHDB。
 
+LevelDB是默认的，当账本状态是简单的键值对时尤为合适。
+LealDB数据库与网络节点紧密地位于同一位置，它嵌入在相同的操作系统进程中。
 
-* **Endorsements**
+当分类账状态被构造为JSON文档时，CouchDB是一个特别合适的选择，因为CouchDB支持业务交易中常见的富查询，还支持更新更丰富的数据类型。
+从实现的角度来看，CouchDB在单独的操作系统进程中运行，但是在网络节点和CouchDB实例之间仍然存在1:1的关系。
+所有这些都是链码不可见的。有关CouchDB的更多信息，请参见 [CouchDB as the StateDatabase](../couchdb_as_state_database.html)。
 
-  As shown in E4, this is a list of signed transaction responses from each
-  required organization sufficient to satisfy the endorsement policy. You'll
-  notice that, whereas only one transaction response is included in the
-  transaction, there are multiple endorsements. That's because each endorsement
-  effectively encodes its organization's particular transaction response --
-  meaning that there's no need to include any transaction response that doesn't
-  match sufficient endorsements as it will be rejected as invalid, and not
-  update the world state.
+在LevelDB和CouchDB中，我们看到了Hyperledger Fabric的一个重要方面 -- 它是*可插拔*的。
+世界状态数据库可以是关系数据存储、图形存储或时态数据库。
+这在可以有效地访问的账本状态的类型中提供了极大的灵活性，允许Hyperledger Fabric解决许多不同类型的问题。
 
-That concludes the major fields of the transaction -- there are others, but
-these are the essential ones that you need to understand to have a solid
-understanding of the ledger data structure.
+## 账本例子: fabcar
 
-## World State database options
+当我们结束账本这个话题时，让我们看一个账本例子。
+如果您运行了[fabcar 账本例子](../write_first_app.html)，那么您已经创建了该分类帐。
 
-The world state is physically implemented as a database, to provide simple and
-efficient storage and retrieval of ledger states. As we've seen, ledger states
-can have simple or complex values, and to accommodate this, the world state
-database implementation can vary, allowing these values to be efficiently
-implemented. Options for the world state database currently include LevelDB and
-CouchDB.
-
-LevelDB is the default and is particularly appropriate when ledger states are
-simple key-value pairs. A LevelDB database is closely co-located with a network
-node -- it is embedded within the same operating system process.
-
-CouchDB is a particularly appropriate choice when ledger states are structured
-as JSON documents because CouchDB supports the rich queries and update of richer
-data types often found in business transactions. Implementation-wise, CouchDB
-runs in a separate operating system process, but there is still a 1:1 relation
-between a network node and a CouchDB instance. All of this is invisible to
-chaincode. See [CouchDB as the StateDatabase](../couchdb_as_state_database.html)
-for more information on CouchDB.
-
-In LevelDB and CouchDB, we see an important aspect of Hyperledger Fabric -- it is
-*pluggable*. The world state database could be a relational data store, or a
-graph store, or a temporal database.  This provides great flexibility in the
-types of ledger states that can be efficiently accessed, allowing Hyperledger
-Fabric to address many different types of problems.
-
-## Example Ledger: fabcar
-
-As we end this topic on the ledger, let's have a look at a sample ledger. If
-you've run the [fabcar sample application](../write_first_app.html), then you've
-created this ledger.
-
-The fabcar sample app creates a set of 10 cars, of different color, make, model
-and owner. Here's what the ledger looks like after the first four cars have been
-created.
+FabCar样本应用程序创建了一套10辆车，不同颜色，制作，模型和所有者。
+当前四辆汽车已经创建时，分类帐看起来是这个样子的。
 
 ![ledger.transaction](./ledger.diagram.6.png)
 
-*The visual vocabulary expressed in facts is as follows: The ledger L, comprises
-a world state, W and a blockchain, B. W contains four states with keys: CAR1,
-CAR2, CAR3 and CAR4. B contains two blocks, 0 and 1. Block 1 contains four
-transactions: T1, T2, T3, T4.*
+*上图表示事情如下： 
+账本L包括世界状态W和区块链B，W包括四个状态：CAR1、CAR2、CAR3和CAR4。
+B包含两个块，0和1。块1包含四个事务：T1、T2、T3、T4。*
 
-We can see that the ledger world state contains states that correspond to CAR0,
-CAR1, CAR2 and CAR3. CAR0 has a value which indicates that it is a blue Toyota
-Prius, owned by Tomoko, and we can see similar states and values for the other
-cars. Moreover, we can see that all car states are at version number 0,
-indicating that this is their starting version number -- they have not been
-updated since they were created.
+我们可以看到，账本世界状态包含对应于CAR0、CAR1、CAR2和CAR3的状态。
+CAR0的值表明它是由Tomoko拥有的蓝色丰田普锐斯，我们可以看到其他汽车类似的状态和价值。
+此外，我们可以看到，所有的汽车状态都在版本号0，表明这是他们的开始版本号，他们从创建后就没有更新。
 
-We can also see that the ledger blockchain contains two blocks.  Block 0 is the
-genesis block, though it does not contain any transactions that relate to cars.
-Block 1 however, contains transactions T1, T2, T3, T4 and these correspond to
-transactions that created the initial states for CAR0 to CAR3 in the world
-state. We can see that block 1 is linked to block 0.
+我们还可以看到，账本区块链包含两个区块。
+块0是创世区块，虽然它不包含任何与汽车相关的交易。
+但是，块1包含交易T1、T2、T3、T4，这些交易对应于为CAR0到CAR3创建世界状态的初始状态的事交易。
+我们可以看到块1链接到块0。
 
-We have not shown the other fields in the blocks or transactions, specifically
-headers and hashes.  If you're interested in the precise details of these, you
-will find a dedicated reference topic elsewhere in the documentation. It gives
-you a fully worked example of an entire block with its transactions in glorious
-detail -- but for now, you have achieved a solid conceptual understanding of a
-Hyperledger Fabric ledger. Well done!
+我们没有在块或交易中显示其他字段，具体地说是头部和哈希值。
+如果你对这些细节有兴趣，你会在文档的其他地方找到一个专门的参考主题。
+它为您提供了一个完整工作的示例，其中详细介绍了整个块的交易，
+但是现在，您已经实现了对Hyperledger Fabric账本的坚实概念理解。做得好！
 
-## More information
+Transaction Flow、Read-Write set语义和CouchDB作为StateDatabase主题，以深入了解事务流、并发控制和世界状态数据库。下一次
 
-See the [Transaction Flow](../txflow.html),
-[Read-Write set semantics](../readwrite.html) and
-[CouchDB as the StateDatabase](../couchdb_as_state_database.html) topics for a
-deeper dive on transaction flow, concurrency control, and the world state
-database.
+## 更多信息
+
+更多信息请参阅 [交易流](../txflow.html),
+[读-写集语义](../readwrite.html) and
+[CouchDB作为状态数据库](../couchdb_as_state_database.html)主题，以深入了解交易流、并发控制和世界状态数据库。
 
 <!--- Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/ -->
