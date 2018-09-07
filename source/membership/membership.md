@@ -218,24 +218,6 @@ Orther-MSP：
 您已经看到了如何使用PKI和MSP来标识区块链网络中的参与者进行协作。
 除了MSP的物理和逻辑结构之外，您还了解了证书、公钥/私钥以及信任根是如何工作的。
 
-### MSP目录的说明
-
-| 目录文件名称           | 目录文件说明     | 是否可选 |
-| ------               | ------        | ------  |
-| admincerts           | MSP的管理员证书  | 必选    |
-| cacerts              | 中间CA证书      | 必选    |
-| intermediacerts      | TLS的根CA证书   |        |
-| crls                 | 证书吊销列表     |        |
-| keystore             | 签名密钥        | 必选    |
-| signcerts            | 节点的签名证书   | 必选    |
-| tlscacerts           | TLS的根CA证书   |        |
-| tlsintermediatecerts | TLS的中间CA证书 |        |
-
-不要把可信根CA和TLS根证书或者中间CA证书设置为MSP管理员证书，
-这样就能把成员管理/签发证书与验证证书等不同职责拆分开来，方便管理和定位问题。
-
-虽然并没有禁止根CA证书和TLS根CA证书采用相同的证书，在生产环境中，还是建议分开。
-
 <!---
 Licensed under Creative Commons Attribution 4.0 International License https://creativecommons.org/licenses/by/4.0/
 -->
